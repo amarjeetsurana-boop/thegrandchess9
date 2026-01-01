@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TheGrandChess9 • Play Online Chess</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<style>
+:root{
+  --bg:#0f172a;
+  --panel:#1e293b;
+  --accent:#22c55e;
+  --accent-hover:#16a34a;
+  --danger:#e94560;
+  --text:#e5e7eb;
+  --text-muted:#94a3b8;
+  --border:rgba(255,255,255,.08);
+  --header-height: 60px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 20px); }
+
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:linear-gradient(180deg,#0f172a,#020617);
+  color:var(--text);
+  min-height:100vh;
+  display:flex; flex-direction:column;
+}
+
+/* Header */
+header{ 
+  display:flex; justify-content:space-between; align-items:center; padding:0 16px; 
+  height: var(--header-height);
+  background:rgba(2, 6, 23, 0.95); border-bottom:1px solid var(--border);
+  position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);
+}
+.brand{font-size:18px;font-weight:700; display:flex; align-items:center; gap:8px;}
+.brand span{color:var(--accent)}
+
+.nav { display: none; } 
+
+/* Main Layout */
+.app{ display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - var(--header-height));}
+
+/* Sidebar */
+.sidebar{ 
+  background:rgba(15, 23, 42, 0.95); 
+  padding:16px; 
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; gap:16px;
+}
+
+.card{ background:var(--panel); padding:16px; border-radius:12px; border:1px solid var(--border);}
+.card h3{margin-bottom:10px;font-size:13px; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px;}
+
+/* Lock & Verification Screens */
+.locked-msg, .verify-msg {
+    text-align: center;
+    padding: 15px;
+    border: 1px dashed var(--text-muted);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size:13px;
+}
+
+.verify-msg {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: #eab308;
+    color: #fef08a;
+}
+
+/* Inputs & Buttons */
+input{ 
+  width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); 
+  background:#020617; color:white; margin-bottom:10px; outline:none;
+  font-size:16px; 
+}
+input:focus{border-color:var(--accent)}
+
+button{ 
+  width:100%; padding:12px; margin-bottom:8px; border-radius:8px; 
+  border:none; background:#334155; color:white; font-weight:600; cursor:pointer;
+  font-size:14px; transition:0.2s;
+}
+button:hover{ background:#475569;}
+button.primary{ background:var(--accent); color:#052e16;}
+button.primary:hover{ background:var(--accent-hover);}
+button.outline { background:transparent; border:1px solid var(--text-muted); color:var(--text-muted); }
+button.outline:hover { border-color:white; color:white; }
+
+/* Main Content */
+.main-content{ padding:16px; display:flex; flex-direction:column; gap:16px;}
+
+#gameSection { display:none; height: 60vh; width: 100%; margin-bottom:16px;}
+iframe{ width:100%; height:100%; border:none; border-radius:12px; background:black;}
+
+/* Details Grid */
+.details-section { display: grid; grid-template-columns: 1fr; gap:16px; }
+.info-card { background:var(--panel); padding:16px; border-radius:12px; border:1px solid var(--border); }
+.info-card h4{ color:var(--accent); margin-bottom:8px; font-size:16px; }
+.info-card p{ font-size:13px; color:var(--text-muted); }
+
+/* Warning Box */
+.warning-box { background: rgba(233, 69, 96, 0.1); border: 1px solid var(--danger); padding:12px; border-radius:8px; font-size:12px; color: #fca5a5; margin-top:10px;}
+
+/* Toast */
+#toast{
+    position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-100px); 
+    background:var(--panel); padding:12px 20px; border-radius:50px;
+    border-left:4px solid var(--accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transition:transform 0.3s ease; z-index:999; width:90%; max-width:400px; text-align:center;
+    font-size:13px;
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Mobile Responsive */
+@media (min-width: 769px) {
+    .nav { display: block; }
+    .details-section { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    #gameSection { height: 80vh; }
+}
+
+@media (max-width: 768px) {
+    .app { display: flex; flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+    .main-content { padding: 10px; }
+    #gameSection { height: 50vh; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="toast">Notification Message</div>
+
+<header>
+  <div class="brand">♟️ <span>TheGrandChess9</span></div>
+  <nav class="nav">
+    <a href="#about" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">About</a>
+    <a href="#contact" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">Contact</a>
+    <a href="#gallery" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">Gallery</a>
+    <a href="#disclaimer" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">Disclaimer</a>
+  </nav>
+</header>
+
+<div class="app">
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="card">
+    <h3>🔐 Account</h3>
+    
+    <!-- LOGIN FORM -->
+    <div id="authForm">
+        <input id="email" placeholder="Email Address" type="email">
+        <input id="password" type="password" placeholder="Password">
+        <button id="loginBtn" class="primary">Login</button>
+        <button id="signupBtn">Sign Up</button>
+        <button id="forgotBtn" class="outline">Forgot Password?</button>
+    </div>
+
+    <!-- PROFILE (Logged In but NOT Verified) -->
+    <div id="verifyProfile" style="display:none;">
+        <div class="verify-msg" style="margin-bottom:10px;">
+            ⚠️ <strong>Email Not Verified</strong><br>
+            Please check your inbox/spam.
+        </div>
+        <div style="font-size:13px; text-align:center; margin-bottom:10px; color:var(--text-muted);" id="pendingEmail"></div>
+        <button id="resendBtn" class="primary">📩 Resend Email</button>
+        <button id="logoutBtn1" class="outline">Logout</button>
+    </div>
+
+    <!-- PROFILE (Logged In & Verified) -->
+    <div id="userProfile" style="display:none; text-align:center;">
+        <div style="color:var(--accent); font-weight:bold; margin-bottom:10px; word-break:break-all;" id="displayEmail"></div>
+        <button id="logoutBtn" style="background:var(--danger)">Logout</button>
+    </div>
+  </div>
+
+  <!-- LOCKED CONTENT (Not Logged In) -->
+  <div id="lockedContent" class="card">
+    <div class="locked-msg">
+        🔒 <strong>Restricted Access</strong><br>
+        Login & Verify Email to Play.
+    </div>
+  </div>
+
+  <!-- LOCKED CONTENT (Logged In but NOT Verified) -->
+  <div id="verifyLockedContent" class="card" style="display:none;">
+    <div class="verify-msg">
+        🚫 <strong>Access Pending</strong><br>
+        Verify email to unlock games.
+    </div>
+  </div>
+
+  <!-- UNLOCKED CONTENT -->
+  <div id="unlockedContent" style="display:none">
+    <div class="card">
+      <h3>🌍 Play Online</h3>
+      <button onclick="openGame('/chess8x8.html')">Chess 8×8</button>
+      <button onclick="openGame('/chess9x9.html')">Chess 9×9</button>
+    </div>
+
+    <div class="card">
+      <h3>🤖 Play vs AI</h3>
+      <button onclick="openGame('/ai8x8.html')">AI 8×8</button>
+      <button onclick="openGame('/ai9x9.html')">AI 9×9</button>
+    </div>
+  </div>
+</aside>
+
+<main class="main-content">
+    <div id="heroMsg" style="text-align:center; padding:10px;">
+        <h1 style="color:white; font-size:1.8rem; margin-bottom:5px;">TheGrandChess9</h1>
+        <p style="color:var(--text-muted); font-size:13px;">Secure verification required to play.</p>
+        
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong><br>
+            If verification link doesn't work, ensure this site is hosted online (not local file://).
+        </div>
+    </div>
+
+    <div id="gameSection">
+        <iframe id="gameFrame"></iframe>
+    </div>
+
+    <div class="details-section">
+        <div class="info-card" id="about">
+            <h4>About Us</h4>
+            <p>TheGrandChess9 is an innovative chess platform dedicated to expanding the horizons of classic strategy.</p>
+        </div>
+
+        <div class="info-card" id="contact">
+            <h4>Contact</h4>
+            <p>📧 support@thegrandchess9.com</p>
+        </div>
+
+        <div class="info-card" id="gallery">
+            <h4>Gallery</h4>
+            <p>Explore brilliant games played on our platform.</p>
+        </div>
+
+        <div class="info-card" id="disclaimer">
+            <h4>Disclaimer</h4>
+            <p>Entertainment purposes only.</p>
+        </div>
+    </div>
+</main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+signOut, sendPasswordResetEmail, onAuthStateChanged, sendEmailVerification, applyActionCode } from
+"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// 1. CHECK FOR LOCAL HOSTING WARNING
+if (window.location.protocol === 'file:') {
+    console.error("Firebase Auth requires HTTPS or localhost. File protocol is not supported for email verification.");
+    alert("⚠️ WARNING: You are opening this file directly from your computer.\n\nEmail Verification Links will NOT work.\n\nPlease host this file on Netlify, Vercel, or GitHub Pages.");
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAszg47yTdrGvq7Tr5xnuyx0qnj8SmAgL0",
+  authDomain: "thegrandchess9-2869e.firebaseapp.com",
+  projectId: "thegrandchess9-2869e",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const emailEl = document.getElementById("email");
+const passEl = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const logoutBtn1 = document.getElementById("logoutBtn1");
+const resendBtn = document.getElementById("resendBtn");
+const forgotBtn = document.getElementById("forgotBtn");
+
+// UI Elements
+const authForm = document.getElementById("authForm");
+const verifyProfile = document.getElementById("verifyProfile");
+const userProfile = document.getElementById("userProfile");
+const pendingEmail = document.getElementById("pendingEmail");
+const displayEmail = document.getElementById("displayEmail");
+const lockedContent = document.getElementById("lockedContent");
+const verifyLockedContent = document.getElementById("verifyLockedContent");
+const unlockedContent = document.getElementById("unlockedContent");
+
+function showToast(msg, type='info') {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.style.borderLeftColor = type === 'error' ? '#e94560' : '#22c55e';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// SIGN UP LOGIC
+signupBtn.onclick = () => {
+  const email = emailEl.value.trim();
+  const pass = passEl.value.trim();
+  if(!email || !pass) return showToast("Please fill all fields", 'error');
+
+  createUserWithEmailAndPassword(auth, email, pass)
+  .then(({user}) => {
+    // Robust Action Code Settings
+    const actionCodeSettings = {
+      url: window.location.href, 
+      handleCodeInApp: true 
+    };
+
+    sendEmailVerification(user, actionCodeSettings)
+    .then(() => {
+        showToast("Verification email sent! Check Spam.", 'success');
+        alert("EMAIL SENT!\n\nPlease check your inbox or Spam folder.\n\nNOTE: If the link doesn't open the app, make sure you are hosting this site on Netlify/Vercel.");
+        // Sign out to force user to verify
+        signOut(auth); 
+    })
+    .catch((err) => {
+        console.error(err);
+        showToast("Error: " + err.message, 'error');
+    });
+  })
+  .catch(err => showToast(err.message, 'error'));
+}
+
+// LOGIN LOGIC
+loginBtn.onclick = () => {
+  if(!emailEl.value || !passEl.value) return showToast("Enter details", 'error');
+  
+  signInWithEmailAndPassword(auth, emailEl.value, passEl.value)
+  .then(async ({user}) => {
+    // Force reload to get latest verification status
+    await user.reload(); 
+    
+    if(user.emailVerified){
+        updateUI(user);
+        showToast("Verified & Logged In!", 'success');
+    } else {
+        showToast("Email not verified yet.", 'error');
+        updateUI(user); // Will show "Resend" UI
+    }
+  })
+  .catch(err => showToast(err.message, 'error'));
+}
+
+// LOGOUT
+logoutBtn.onclick = () => signOut(auth).then(()=>{ updateUI(null); showToast("Logged out", 'info'); });
+logoutBtn1.onclick = () => signOut(auth).then(()=>{ updateUI(null); showToast("Logged out", 'info'); });
+
+// RESEND VERIFICATION
+resendBtn.onclick = () => {
+    const user = auth.currentUser;
+    if(user && !user.emailVerified){
+        const actionCodeSettings = {
+            url: window.location.href,
+            handleCodeInApp: true
+        };
+        sendEmailVerification(user, actionCodeSettings)
+        .then(() => showToast("Verification email resent!", 'success'))
+        .catch(err => showToast(err.message, 'error'));
+    }
+}
+
+// FORGOT PASSWORD
+forgotBtn.onclick = () => {
+    if(!emailEl.value) return showToast("Enter email first", 'error');
+    sendPasswordResetEmail(auth, emailEl.value)
+    .then(()=>showToast("Reset email sent!", 'success'))
+    .catch(err=>showToast(err.message, 'error'));
+}
+
+// UI STATE MANAGER
+function updateUI(user){
+    // Reset all views
+    authForm.style.display = 'none';
+    userProfile.style.display = 'none';
+    verifyProfile.style.display = 'none';
+    lockedContent.style.display = 'none';
+    verifyLockedContent.style.display = 'none';
+    unlockedContent.style.display = 'none';
+
+    if (user) {
+        // User is logged in
+        if (user.emailVerified) {
+            // Case: VERIFIED
+            userProfile.style.display = 'block';
+            displayEmail.innerText = user.email;
+            unlockedContent.style.display = 'block';
+        } else {
+            // Case: LOGGED IN BUT NOT VERIFIED
+            verifyProfile.style.display = 'block';
+            pendingEmail.innerText = user.email;
+            verifyLockedContent.style.display = 'block';
+        }
+    } else {
+        // Case: NOT LOGGED IN
+        authForm.style.display = 'block';
+        lockedContent.style.display = 'block';
+    }
+}
+
+// AUTH STATE LISTENER
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    user.reload().then(() => {
+        updateUI(user);
+    });
+  } else { 
+    updateUI(null); 
+  }
+});
+</script>
+
+<script>
+function openGame(url) {
+    document.getElementById('heroMsg').style.display = 'none';
+    document.getElementById('gameSection').style.display = 'block';
+    document.getElementById('gameFrame').src = url;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
