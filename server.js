@@ -25,11 +25,11 @@ app.use(express.static("public"));
 
 // ✅ Routes for 9x9 and 8x8
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "chess9x9.html"));
+  res.sendFile(path.join(__dirname, "public", "Chess9x9.html"));
 });
 
-app.get("/chess9x9", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "chess9x9.html"));
+app.get("/Chess9x9", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "Chess9x9.html"));
 });
 
 app.get("/chess8x8", (req, res) => {
