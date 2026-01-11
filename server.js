@@ -20,27 +20,21 @@ const io = new Server(server, {
   }
 });
 
-// 🔹 STATIC FILES
+// ✅ Serve static files
 app.use(express.static("public"));
 
-/* ========= ADD THESE ROUTES ========= */
-
-// 🔥 Default → 9×9 Chess
+// ✅ Routes for 9x9 and 8x8
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chess9x9.html"));
 });
 
-// 9×9 direct route
 app.get("/chess9x9", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chess9x9.html"));
 });
 
-// 8×8 direct route
 app.get("/chess8x8", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chess8x8.html"));
 });
-
-/* =================================== */
 
 const rooms = {};
 
