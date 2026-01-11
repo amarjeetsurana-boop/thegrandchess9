@@ -28,6 +28,30 @@ body{
   display:flex; flex-direction:column;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  background: #ffffff;          /* white base */
+  padding: 4px;
+  border-radius: 10%;
+  box-shadow:
+    0 0 6px rgba(255,255,255,0.6),
+    0 0 12px rgba(34,197,94,0.6); /* green glow */
+}
+
+.brand-logo {
+  filter: drop-shadow(0 0 6px rgba(176,141,47,0.7));
+}
+
 /* Header */
 header{ 
   display:flex; justify-content:space-between; align-items:center; padding:0 16px; 
@@ -104,16 +128,31 @@ iframe{ width:100%; height:100%; border:none; border-radius:12px; background:bla
 /* Warning Box */
 .warning-box { background: rgba(233, 69, 96, 0.1); border: 1px solid var(--danger); padding:12px; border-radius:8px; font-size:12px; color: #fca5a5; margin-top:10px;}
 
-/* Toast */
+/* Toast Notification */
 #toast{
-    position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-100px); 
-    background:var(--panel); padding:12px 20px; border-radius:50px;
-    border-left:4px solid var(--accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    transition:transform 0.3s ease; z-index:999; width:90%; max-width:400px; text-align:center;
-    font-size:13px;
+  position: fixed;
+  top: calc(var(--header-height) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  padding: 12px 20px;
+  border-radius: 12px;
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  z-index: 9999;              /* 🔥 Header से ऊपर */
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, top 0.3s ease;
 }
-#toast.show{transform:translateX(-50%) translateY(0);}
 
+#toast.show{
+  opacity: 1;
+  top: calc(var(--header-height) + 20px);
+}
 /* Mobile Responsive */
 @media (min-width: 769px) {
     .nav { display: block; }
@@ -135,13 +174,11 @@ iframe{ width:100%; height:100%; border:none; border-radius:12px; background:bla
 <div id="toast">Notification Message</div>
 
 <header>
-  <div class="brand">♟️ <span>TheGrandChess9</span></div>
-  <nav class="nav">
-    <a href="#about" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">About</a>
-    <a href="#contact" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">Contact</a>
-    <a href="#gallery" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">Gallery</a>
-    <a href="#disclaimer" style="margin-left:15px; color:var(--text-muted); text-decoration:none;">Disclaimer</a>
-  </nav>
+  <div class="brand">
+  <img src="img/Logo.png" alt="TheGrandChess9 Logo" class="brand-logo">
+  <span>TheGrandChess9</span>
+</div>
+  
 </header>
 
 <div class="app">
@@ -224,26 +261,7 @@ iframe{ width:100%; height:100%; border:none; border-radius:12px; background:bla
         <iframe id="gameFrame"></iframe>
     </div>
 
-    <div class="details-section">
-        <div class="info-card" id="about">
-            <h4>About Us</h4>
-            <p>TheGrandChess9 is an innovative chess platform dedicated to expanding the horizons of classic strategy.</p>
-        </div>
-
-        <div class="info-card" id="contact">
-            <h4>Contact</h4>
-            <p>📧 support@thegrandchess9.com</p>
-        </div>
-
-        <div class="info-card" id="gallery">
-            <h4>Gallery</h4>
-            <p>Explore brilliant games played on our platform.</p>
-        </div>
-
-        <div class="info-card" id="disclaimer">
-            <h4>Disclaimer</h4>
-            <p>Entertainment purposes only.</p>
-        </div>
+    
     </div>
 </main>
 </div>
