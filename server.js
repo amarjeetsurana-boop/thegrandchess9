@@ -21,7 +21,13 @@ const io = new Server(server, {
 });
 
 // ✅ Serve static files
-app.use(express.static("public"));
+app.use(express.static("public", {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.setHeader("Cache-Control", "no-store");
+  }
+}));
 
 // ✅ Routes for 9x9 and 8x8
 app.get("/", (req, res) => {
