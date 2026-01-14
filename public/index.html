@@ -116,8 +116,10 @@ button.outline:hover { border-color:white; color:white; }
 /* Main Content */
 .main-content{ padding:16px; display:flex; flex-direction:column; gap:16px;}
 
-#gameSection { display:none; height: 60vh; width: 100%; margin-bottom:16px;}
+/* --- UPDATED HEIGHT SECTION --- */
+#gameSection { display:none; height: 85vh; width: 100%; margin-bottom:16px; margin-top: 10px;}
 iframe{ width:100%; height:100%; border:none; border-radius:12px; background:black;}
+/* --- END UPDATED SECTION --- */
 
 /* Details Grid */
 .details-section { display: grid; grid-template-columns: 1fr; gap:16px; }
@@ -153,18 +155,19 @@ iframe{ width:100%; height:100%; border:none; border-radius:12px; background:bla
   opacity: 1;
   top: calc(var(--header-height) + 20px);
 }
+
 /* Mobile Responsive */
 @media (min-width: 769px) {
     .nav { display: block; }
     .details-section { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-    #gameSection { height: 80vh; }
+    #gameSection { height: 95vh; } /* INCREASED for Desktop */
 }
 
 @media (max-width: 768px) {
     .app { display: flex; flex-direction: column; }
     .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
     .main-content { padding: 10px; }
-    #gameSection { height: 50vh; }
+    #gameSection { height: 75vh; } /* INCREASED for Mobile */
 }
 </style>
 </head>
@@ -332,7 +335,7 @@ signupBtn.onclick = () => {
     sendEmailVerification(user, actionCodeSettings)
     .then(() => {
         showToast("Verification email sent! Check Spam.", 'success');
-        alert("EMAIL SENT!\n\nPlease check your inbox or Spam folder.\n\nNOTE: If the link doesn't open the app, make sure you are hosting this site on Netlify/Vercel.");
+        alert("EMAIL SENT!\n\nPlease check your inbox or Spam folder.\n\nNOTE: If link doesn't open the app, make sure you are hosting this site on Netlify/Vercel.");
         // Sign out to force user to verify
         signOut(auth); 
     })
