@@ -1,316 +1,590 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>TheGrandChess9 • Fast Powerful AI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TheGrandChess9 — Modern Rebuild</title>
 <style>
-/* (CSS same as before) */
-.pieces-info { max-width: 800px; margin: 10px auto; text-align: center; }
-.pieces-row { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; flex-wrap: nowrap; }
-.white-row .piece-item { background: #eef6ff; }
-.black-row .piece-item { background: #ffeede; }
-.piece-item { display: flex; flex-direction: column; align-items: center; width: 70px; padding: 10px; border-radius: 12px; box-shadow: 0 2px 3px rgba(0,0,0,0.15); transition: 0.10; }
-.piece-item img { width: 55px; height: 55px; margin-bottom: 4px; }
-.piece-item span { font-size: 10px; font-weight: 400; font-weight: bold; }
-.piece-item:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.25); }
-:root{ --bg:#d0e6b8; --panel:#f7f7f7; --border:#999; --shadow:rgba(0,0,0,0.25); --light:#f0d9b5; --dark:#b58863; --accent:#2d9cdb; --accent-2:#2ecc71; }
-*{box-sizing:border-box}
-body{ margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;font-size:15px; background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start; min-height:100vh;padding:12px; }
-.header{ text-align:center;font-size:1.5rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
-.header img{height:40px;}
-.options, .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:10px;}
-button{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:0.95em;cursor:pointer;transition:0.12s;user-select:none;}
-button:hover{transform:translateY(-1px);box-shadow:0 6px 12px rgba(0,0,0,0.06);}
-button.active{background:linear-gradient(180deg,#f8fcff,#8C9399);border-color:var(--accent);box-shadow:0 6px 18px rgba(45,156,219,0.12);}
-.mode-status{text-align:center;font-size:13px;color:#0c4a6e;margin-bottom:6px;min-height:18px;}
-.board-container{background:#b58863;padding:10px;border-radius:10px;box-shadow:0 3px 8px var(--shadow);margin-bottom:12px;border:3px solid white;max-width:820px;width:100%;}
-.left-board{display:grid;grid-template-columns:44px 704px;grid-template-rows:704px 44px;gap:5x;}
-.rank-labels{grid-column:1;grid-row:1;display:flex;flex-direction:column;height:704px;}
-.rank-label{height:78px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;font-weight:700;background:transparent;}
-.board-wrap{grid-column:2;grid-row:1;display:flex;justify-content:center;align-items:center;}
-.chessboard{display:grid;grid-template-columns:repeat(9,78px);grid-template-rows:repeat(9,78px);width:702px;height:702px;margin:1px;background:transparent;border-radius:6px;overflow:hidden;}
-.square{width:78px;height:78px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer;}
-.square.light{background:#f5edd7;}
-.square.dark{background:#dbac76;}
-.square.selected{outline:3px solid rgba(52,152,219,0.95);}
-.square.highlight{outline:3px solid rgba(46,204,113,0.95);}
-.square.c-choose{outline:8px solid #e67e22;box-shadow:0 0 0 4px #ffe9c1;}
-.square.last-move{box-shadow: inset 0 0 0 3px rgba(0,0,0,0.06);}
-img.piece{width:66px;height:66px;user-select:none;pointer-events:none;}
-.file-labels{grid-column:2;grid-row:2;display:flex;flex-direction:row;width:702px;margin-left:1px;}
-.file-label{width:78px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;font-weight:700;}
-.game-info{background:var(--panel);padding:12px;border-radius:8px;text-align:left;box-shadow:0 2px 6px var(--shadow);font-size:15px;color:#222;max-width:820px;width:100%;}
-.game-info .head{font-size:18px;font-weight:800;margin-bottom:10px;}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;}
-.info-grid .box{background:white;padding:8px;border-radius:6px;border:1px solid #eee;font-weight:700;text-align:center;}
-.status{margin:10px 0;padding:10px;font-weight:700;font-size:15px;text-align:center;border-radius:7px;}
-.status.check{background:#ffe7b3;color:#bb6702;}
-.status.mate{background:#ffc3c3;color:#d0002a;}
-.status.stale{background:#dbf3ff;color:#226edc;}
-.status.cmsg{background:#e7f6ff;color:#186dd6;}
-.moves{height:160px;overflow:auto;background:white;border-radius:8px;padding:8px;font-family:monospace;margin-top:8px;}
-.buttons-row{display:flex;gap:10px;margin-top:10px;justify-content:flex-start;}
-.footer{font-size:13px;color:#666;margin-top:12px;}
-.modal{position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:999;}
-.modal-card{background:#fff;padding:14px;border-radius:10px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
-.promo-piece{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;}
-.promo-piece img{width:54px;height:54px;}
-.rule-modal .rules-content{max-height:70vh;overflow:auto;padding:12px;background:#fff;border-radius:8px;}
-.ai-thinking { 
-  position: absolute; 
-  top: 10px; 
-  right: 10px; 
-  background: rgba(255,255,255,0.9); 
-  padding: 8px 12px; 
-  border-radius: 6px; 
-  font-weight: bold; 
-  display: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.ai-level-selector {
-  margin: 10px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.ai-level-selector label {
-  font-weight: bold;
-}
-.ai-level-selector select {
-  padding: 5px;
-  border-radius: 4px;
-  border: 1px solid #999;
-}
-.ai-performance {
-  position: absolute;
-  top: 50px;
-  right: 10px;
-  background: rgba(255,255,255,0.9);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  display: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-@media (max-width:860px){ .left-board{grid-template-columns:34px 540px;grid-template-rows:540px 34px;} .rank-label{height:60px;font-size:18px;} .chessboard{
-  display:grid;
-  grid-template-columns:repeat(9,88px);
-  grid-template-rows:repeat(9,88px);
-  width:792px;
-  height:792px;
-  margin:1px;
-  background:transparent;
-  border-radius:6px;
-  overflow:hidden;
+  :root{
+    --bg:#0f1724;
+    --panel:#0b1220;
+    --muted:#9aa4b2;
+    --accent:#2dd4bf;
+    --glass: rgba(255,255,255,0.035);
+    --white:#eef2f7;
+    --light-square:#f7efe1;
+    --dark-square:#caa46a;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    color:var(--white);
+    background:linear-gradient(180deg,#071128 0%, #0e1a2b 100%);
+    -webkit-font-smoothing:antialiased;
+  }
+  .container{
+    max-width:1000px;
+    margin:28px auto;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    align-items:center;
+  }
 
-  gap:4px;   /* 👈 यही squares के बीच का gap है */
-} }
+  /* HEADER */
+  header.app{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    width:100%;
+    gap:10px;
+  }
+  .logo{
+    width:60px;
+    height:auto;
+    margin-bottom:8px;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),#60a5fa);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    color:#042028;
+  }
+  h1{margin:0;font-size:18px}
+  .small{font-size:13px;color:var(--muted)}
+
+  .controls{
+    margin-left:0;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .mode-btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:8px 12px;
+    border-radius:8px;
+    color:var(--white);
+    cursor:pointer;
+    font-weight:700;
+  }
+  .mode-btn.active{
+    background:linear-gradient(90deg,#e6fffa20,#dbeafe20);
+    color:var(--accent);
+    border-color:rgba(45,156,219,0.25);
+  }
+  .action-btn{
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.04);
+    padding:8px 12px;
+    border-radius:10px;
+    color:var(--white);
+    cursor:pointer;
+    font-weight:900;
+  }
+  .action-btn.ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .room-badge{
+    background:#063;
+    color:#dfffe7;
+    padding:6px 10px;
+    border-radius:8px;
+    font-weight:900;
+    display:none;
+  }
+
+  /* BOARD + INFO LAYOUT */
+  .board-wrap{
+    background:linear-gradient(180deg,#b3cdf2 0%, #f2d0f2 100%);
+    padding:14px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    display:flex;
+    flex-direction:row;
+    align-items:stretch;         /* equal height columns */
+    gap:16px;
+    width:100%;
+  }
+
+  .board-panel{
+    background:var(--panel);
+    padding:14px;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    flex:1 1 0;
+    align-items:center;
+  }
+
+  /* BOARD + RANK LABELS */
+  .board-row-wrap{
+    display:flex;
+    gap:10px;
+    align-items:stretch;        /* rank-labels + board same height */
+    width:100%;
+    max-width:640px;
+  }
+
+  #board{
+    width:100%;
+    max-width:640px;
+    aspect-ratio:1/1;
+    display:grid;
+    grid-template-columns:repeat(9,1fr);
+    grid-template-rows:repeat(9,1fr);
+    gap:6px;                   /* squares ke beech gap */
+    padding:2px;
+    background:#000;           /* gap ka color */
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+.cell{
+  border-radius:3px;
+}
+  .cell{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    position:relative;
+  }
+  .cell.light{background:var(--light-square)}
+  .cell.dark{background:var(--dark-square)}
+  img.piece{
+    width:74%;
+    height:74%;
+    object-fit:contain;
+    pointer-events:none;
+    user-select:none;
+  }
+  .last-move{box-shadow:inset 0 0 0 5px rgba(0,0,0,0.06);}
+  .selected{outline:4px solid rgba(45,156,219,0.95);outline-offset:-3px;border-radius:6px}
+  .highlight{outline:4px solid rgba(46,204,113,0.95);outline-offset:-3px;border-radius:6px}
+  .c-choose{outline:5px solid #f59e0b;outline-offset:-3px;border-radius:6px}
+
+  /* RANK LABELS 1–9 */
+  .rank-labels{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin-right:6px;
+    height:100%;
+  }
+  .rank-label{
+    width:26px;
+    flex:1 1 0;                /* 9 equal rows */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-weight:800;
+    font-size:13px;
+  }
+
+  /* FILE LABELS a–i */
+  .file-labels{
+    display:flex;
+    gap:0;
+    margin-top:8px;
+    justify-content:center;
+    width:100%;
+    max-width:640px;
+  }
+  .file-label{
+    flex:1 1 0;                /* 9 equal columns */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-weight:800;
+  }
+
+  /* INFO PANEL */
+  aside.info-panel{
+    background:linear-gradient(180deg,#071428 0%, #81baeb 100%);
+    padding:18px;
+    border-radius:12px;
+    color:var(--muted);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    flex:0 0 260px;            /* width ~260, height flexbox se stretch */
+  }
+  .status{color:var(--white);font-weight:800}
+  .moves{
+    background:var(--glass);
+    padding:8px;
+    border-radius:8px;
+    height:260px;
+    overflow:auto;
+    color:var(--white);
+    font-family:monospace;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    margin-top:8px;
+  }
+
+  /* Rules / pieces boxes (tumhare paste se) */
+  .compact-row{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:nowrap;
+    margin:10px 0;
+  }
+  .piece-box{
+    width:70px;
+    background:#ceedc5;
+    border-radius:6px;
+    padding:6px;
+    text-align:center;
+    box-shadow:0 2px 5px rgba(0,0,0,0.15);
+  }
+  .piece-box img{
+    width:42px;
+    height:42px;
+    display:block;
+    margin:auto;
+  }
+  .piece-box span{
+    display:block;
+    font-size:10px;
+    margin-top:3px;
+    color:#333;
+    font-weight:600;
+  }
+  .rules-list{
+  list-style:none;
+  padding:0;
+  margin:0 0 12px 0;
+}
+
+.rules-list li{
+  margin-bottom:10px;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;   /* ✅ last line justify nahi hogi */
+  font-size:14px;
+  line-height:1.4;
+  color:#111;
+}
+
+  /* Promo modal */
+  #promoModal{
+    position:fixed;
+    left:0;top:0;right:0;bottom:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(2,6,23,0.6);
+    z-index:9999;
+  }
+  .promoCard{
+    background:#021528;
+    padding:14px;
+    border-radius:10px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .promoCard img{
+    width:56px;
+    height:56px;
+    cursor:pointer;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,0.6));
+  }
+
+  @media(max-width:1100px){
+    .board-wrap{
+      flex-direction:column;
+      align-items:center;
+    }
+    aside.info-panel{
+      width:100%;
+      flex:0 0 auto;
+    }
+    .file-labels,.rank-labels{display:none;} /* optional mobile */
+    #board{
+      width:calc(100vw - 120px);
+      max-width:none;
+    }
+    .board-row-wrap{
+      max-width:none;
+    }
+  }
+
+
+/* ===== Setup Required Popup ===== */
+#setupMsg{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: fadeIn 0.3s ease;
+}
+
+#setupMsg .box{
+  background: #fff;
+  width: 92%;
+  max-width: 420px;
+  border-radius: 14px;
+  padding: 22px 20px 20px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  position: relative;
+  animation: scaleIn 0.35s ease;
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+/* Title */
+#setupMsg h3{
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #111;
+}
+
+/* Message text */
+#setupMsg p{
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 18px;
+}
+
+/* Highlight text */
+#setupMsg b{
+  color: #c62828;
+}
+
+/* OK button */
+#setupMsg button{
+  background: linear-gradient(135deg,#111,#333);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  font-size: 14px;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+#setupMsg button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+/* Close (X) button */
+#setupMsg .close{
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  transition: color .2s ease, transform .2s ease;
+}
+
+#setupMsg .close:hover{
+  color: #000;
+  transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes scaleIn{
+  from{transform:scale(.85)}
+  to{transform:scale(1)}
+}
+
+
+/* ===============================
+   CHESS 9x9 – SOFT 1px 3D SQUARES
+   =============================== */
+
+#board{
+  perspective: 600px;
+}
+
+/* chess squares */
+.cell{
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  transform-style: preserve-3d;
+
+  box-shadow:
+    inset 1px 1px 2px rgba(255,255,255,0.45),
+    inset -1px -1px 2px rgba(0,0,0,0.45),
+    0 1px 3px rgba(0,0,0,0.35);
+}
+
+/* hover = very slight lift */
+.cell:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    inset 1px 1px 2px rgba(255,255,255,0.55),
+    inset -1px -1px 2px rgba(0,0,0,0.55),
+    0 3px 6px rgba(0,0,0,0.45);
+}
+
+/* selected square */
+.cell.selected{
+  transform: translateY(-1px);
+  box-shadow:
+    inset 1px 1px 2px rgba(255,255,255,0.6),
+    inset -1px -1px 2px rgba(0,0,0,0.6),
+    0 4px 8px rgba(0,0,0,0.55);
+}
+
 </style>
 </head>
 <body>
+<div class="container">
 
-  <!-- Header -->
-  <div class="header">
-    <img src="img/Logo.png" alt="Logo">
-    <span>TheGrandChess9</span>
-    <img src="img/Logo.png" alt="Logo">
-  </div>
-
-<!-- PIECES INFORMATION BUTTON -->
-<button id="infoBtn" style="
-  margin-top:10px;
-  background:#fff;
-  border:1px solid #666;
-  padding:8px 14px;
-  border-radius:8px;
-  font-weight:800;
-  cursor:pointer;
-">
- Rules of the Game and Pieces Information
-</button>
-
-<!-- POPUP MODAL -->
-<div id="infoModal" style="
-  position:fixed;
-  left:0; top:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.4);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-">
-  <div style="
-    background:white;
-    padding:18px;
-    border-radius:10px;
-    width:90%;
-    max-width:720px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.25);
-  ">
-    <h2 style="margin-top:0; text-align:left;">
-  <strong>Rules of TheGrandChess9</strong>
-</h2>
-
-<div style="font-size:15px; line-height:1.5;">
-  <!-- SCROLLABLE RULES BOX -->
-  <div class="rules-box" style="
-    max-height:380px;
-    overflow-y:auto;
-    padding:16px;
-    border:1px solid #ccc;
-    border-radius:10px;
-    background:#fff;
-  ">
-
-    <h2>⏩ Board Size</h2>
-    <p>
-      Standard chess is played on an 8×8 board containing 64 squares.
-      TheGrandChess9 expands the battlefield to a 9×9 board consisting of 81 squares,
-      allowing for new strategies and piece interactions.
-    </p>
-
-    <h2>⏩ Extra Pawns</h2>
-    <p>
-      Each player starts with 10 pawns on the 9×9 board.
-      Before the game begins, both players are allowed to place 2 additional pawns.
-      White places these pawns on Rank 3, while Black places them on Rank 7.
-    </p>
-    <p>
-      Pawn movement follows traditional chess rules: pawns may move two squares on their first move,
-      one square afterward, capture diagonally, and promote upon reaching the final rank.
-    </p>
-
-    <h2>⏩ New Piece 1: Charioteer (c)</h2>
-    <p>
-      Charioteer must always remain adjacent to its own King.
-      It must occupy one of the eight surrounding squares of the King,
-      including horizontal, vertical, and diagonal positions.
-    </p>
-
-    <p>
-      The Charioteer may move freely around the King, provided that it remains adjacent
-      after every move.
-    </p>
-
-    <p>
-      The Charioteer is a defensive piece. It cannot capture any other piece,
-      and no piece on the board is allowed to capture the Charioteer.
-    </p>
-
-    <p>
-      If the King moves and the Charioteer is no longer adjacent,
-      the player is granted one extra move to reposition the Charioteer next to the King.
-      All check-related rules continue to apply normally.
-    </p>
-
-    <h2>⏩ New Piece 2: Sceptre (s)</h2>
-    <p>
-      The Sceptre is a powerful piece that combines the movement abilities
-      of the Bishop, Rook, and Knight.
-    </p>
-
-    <h2>⏩ Piece Names & Special Rules</h2>
-    <p>
-      In TheGrandChess9, the Rook is called <strong>Airavat</strong>,
-      and the Queen is called <strong>Commander</strong>.
-      Castling is not permitted in this variant.
-    </p>
-
-    <h2>⏩ Other Rules</h2>
-    <p>
-      All remaining rules follow classic chess, including Check, Checkmate,
-      En Passant, and Stalemate. White always moves first.
-    </p>
-
-  </div>
-</div>
-
-<h2> The Grand Chess 9-Pieces Information </h2>
-  <!-- WHITE ROW -->
-  <div class="pieces-row white-row">
-    <div class="piece-item"><img src="img/wk.png"><span>KING</span></div>
-    <div class="piece-item"><img src="img/wc.png"><span>CHARIOTEER</span></div>
-    <div class="piece-item"><img src="img/ws.png"><span>SCEPTRE</span></div>
-    <div class="piece-item"><img src="img/wq.png"><span>COMMANDER</span></div>
-    <div class="piece-item"><img src="img/wr.png"><span>AIRAVAT</span></div>
-    <div class="piece-item"><img src="img/wb.png"><span>BISHOP</span></div>
-    <div class="piece-item"><img src="img/wn.png"><span>KNIGHT</span></div>
-    <div class="piece-item"><img src="img/wp.png"><span>PAWN</span></div>
-  </div>
-
-  <!-- BLACK ROW -->
-  <div class="pieces-row black-row">
-    <div class="piece-item"><img src="img/bk.png"><span>KING</span></div>
-    <div class="piece-item"><img src="img/bc.png"><span>CHARIOTEER</span></div>
-    <div class="piece-item"><img src="img/bs.png"><span>SCEPTRE</span></div>
-    <div class="piece-item"><img src="img/bq.png"><span>COMMANDER</span></div>
-    <div class="piece-item"><img src="img/br.png"><span>AIRAVAT</span></div>
-    <div class="piece-item"><img src="img/bb.png"><span>BISHOP</span></div>
-    <div class="piece-item"><img src="img/bn.png"><span>KNIGHT</span></div>
-    <div class="piece-item"><img src="img/bp.png"><span>PAWN</span></div>
-  </div>
-
-    <button id="closeInfo"
-      style="
-        margin-top:15px;
-        width:100%;
-        padding:10px;
-        border-radius:8px;
-        background:#eaeaea;
-        border:1px solid #999;
-        font-weight:600;
-        cursor:pointer;
-      ">
-      Close
-    </button>
-  </div>
-</div>
-
-
-  <!-- Mode status (non-blocking) -->
-  <div class="mode-status" id="modeStatus">Mode: Human vs Human</div>
-
-  <!-- Top Buttons (active) -->
-  <div class="options" role="toolbar" aria-label="Game modes">
-       <button id="btnHvh" onclick="setMode('hvh')">Human vs Human</button>
-    <button id="btnHvc" onclick="setMode('hvc')">Human vs Computer (AI)</button>
-    <button id="btnHvo" onclick="setMode('hvo')">Human vs Online Friend</button>
-  </div>
-
-  <!-- AI Level Selector -->
-  <div class="ai-level-selector" id="aiLevelSelector" style="display: none;">
-    <label for="aiLevel">AI Level:</label>
-    <select id="aiLevel">
-      <option value="1">Easy (Depth 2)</option>
-      <option value="2">Medium (Depth 3)</option>
-      <option value="3" selected>Hard (Depth 4)</option>
-      <option value="4">Expert (Depth 5)</option>
-      <option value="5">Master (Time-based)</option>
-    </select>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls">
-    <button id="undoBtn">Undo</button>
-    <button id="resetBtn">Reset</button>
-    <button id="startBtn">Start</button>
-    <button id="flipBtn">Flip Board</button>
-  </div>
-
-  <!-- Board -->
-  <div class="board-container" id="boardContainer">
-    <div class="ai-thinking" id="aiThinking">AI is thinking...</div>
-    <div class="ai-performance" id="aiPerformance"></div>
-    <div class="left-board">
-      <div class="rank-labels" aria-hidden="true">
-        <div class="rank-label">9</div><div class="rank-label">8</div><div class="rank-label">7</div>
-        <div class="rank-label">6</div><div class="rank-label">5</div><div class="rank-label">4</div>
-        <div class="rank-label">3</div><div class="rank-label">2</div><div class="rank-label">1</div>
+  <header class="app">
+    <div class="brand">
+      <img src="img/Logo.png" class="logo">
+      <div>
+        <h1>TheGrandChess9</h1>
+        <div class="small">Software Develop by : <strong>Jitendra Surana & Rishab Surana</strong></div>
       </div>
-      <div class="board-wrap">
-        <div class="chessboard" id="chessboard" role="grid" aria-label="Chessboard"></div>
+    </div>
+
+    <button id="infoBtn" style="
+      margin-top:10px;
+      background:#fff;
+      border:1px solid #666;
+      padding:8px 14px;
+      border-radius:8px;
+      font-weight:800;
+      cursor:pointer;
+    ">
+      Rules of the Game and Pieces Information
+    </button>
+
+    <!-- RULES POPUP -->
+    <div id="infoPopup" style="
+      display:none;
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:rgba(0,0,0,0.6);
+      z-index:9999;
+    ">
+      <div style="
+        width:100%;max-width:700px;
+        background:#fff;color:#222;
+        padding:20px;border-radius:10px;
+        margin:60px auto;
+        max-height:80vh;overflow-y:auto;
+      ">
+        <h1 style="margin-top:0;">Rules of the Game & Pieces Information</h1>
+        <ul class="rules-list">
+          <li>⏩ <strong>BOARD SIZE:</strong> Standard chess is played on an 8×8 board containing 64 squares.
+      TheGrandChess9 expands the battlefield to a 9×9 board consisting of 81 squares,
+      allowing for new strategies and piece interactions.</li>
+          <li>⏩ <strong>EXTRA PAWN:</strong> Each player starts with 10 pawns on the 9×9 board.
+      Before the game begins, both players are allowed to place 2 additional pawns.
+      White places these pawns on Rank 3, while Black places them on Rank 7. Pawn movement follows traditional chess rules: pawns may move two squares on their first move,
+      one square afterward, capture diagonally, and promote upon reaching the final rank.</li>
+          <li>⏩ <strong>CHARIOTEER (c):</strong> Charioteer must always remain adjacent to its own King.
+      It must occupy one of the eight surrounding squares of the King,
+      including horizontal, vertical, and diagonal positions.The Charioteer may move freely around the King, provided that it remains adjacent after every move.The Charioteer is a defensive piece. It cannot capture any other piece,
+      and no piece on the board is allowed to capture the Charioteer.If the King moves and the Charioteer is no longer adjacent,
+      the player is granted one extra move to reposition the Charioteer next to the King.
+      All check-related rules continue to apply normally.</li>
+          <li>⏩ <strong>SCEPTRE (s):</strong> The Sceptre is a powerful piece that combines the movement abilities
+      of the Bishop, Rook, and Knight.</li>
+          <li>⏩ <strong>RENAMED:</strong> In TheGrandChess9, the Rook is called <strong>Airavat</strong>, and the Queen is called <strong>Commander</strong>.
+      Castling is not permitted in this variant.</li>
+          <li>⏩ <strong>OTHER RULES:</strong> All remaining rules follow classic chess, including Check, Checkmate,En Passant, and Stalemate. White always moves first. </li>
+        </ul>
+
+        <h2 style="text-align:center;margin:10px 0;">The Grand Chess 9 – Pieces Information</h2>
+        <div class="compact-row">
+          <div class="piece-box"><img src="img/wk.png"><span>KING</span></div>
+          <div class="piece-box"><img src="img/wc.png"><span>CHARIOTEER</span></div>
+          <div class="piece-box"><img src="img/ws.png"><span>SCEPTRE</span></div>
+          <div class="piece-box"><img src="img/wq.png"><span>COMMANDER</span></div>
+          <div class="piece-box"><img src="img/wr.png"><span>AIRAVAT</span></div>
+          <div class="piece-box"><img src="img/wb.png"><span>BISHOP</span></div>
+          <div class="piece-box"><img src="img/wn.png"><span>KNIGHT</span></div>
+          <div class="piece-box"><img src="img/wp.png"><span>PAWN</span></div>
+        </div>
+        <div class="compact-row">
+          <div class="piece-box"><img src="img/bk.png"><span>KING</span></div>
+          <div class="piece-box"><img src="img/bc.png"><span>CHARIOTEER</span></div>
+          <div class="piece-box"><img src="img/bs.png"><span>SCEPTRE</span></div>
+          <div class="piece-box"><img src="img/bq.png"><span>COMMANDER</span></div>
+          <div class="piece-box"><img src="img/br.png"><span>AIRAVAT</span></div>
+          <div class="piece-box"><img src="img/bb.png"><span>BISHOP</span></div>
+          <div class="piece-box"><img src="img/bn.png"><span>KNIGHT</span></div>
+          <div class="piece-box"><img src="img/bp.png"><span>PAWN</span></div>
+        </div>
+
+        <button onclick="closeInfo()" style="
+          margin-top:10px;
+          background:#222;color:#fff;border:none;
+          padding:8px 16px;border-radius:8px;cursor:pointer;
+        ">Close</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btnHvh" class="mode-btn">Human vs Human</button>
+      <button id="btnHvc" class="mode-btn">Human vs Computer</button>
+      <button id="btnHvo" class="mode-btn active">Human vs Online</button>
+      <button id="startBtn" class="action-btn">Start Pawn Placement</button>
+      <div class="controls-bottom">
+        <button id="resetBtn" class="action-btn ghost">Reset</button>
+        <button id="undoBtn" class="action-btn ghost">Undo</button>
+        <button id="flipBtn" class="action-btn ghost">Flip</button>
+      </div>
+      <div id="roomBadge" class="room-badge"></div>
+    </div>
+  </header>
+
+  <div class="board-wrap">
+    <div class="board-panel">
+      <div class="board-row-wrap">
+        <div class="rank-labels" aria-hidden="true">
+          <div class="rank-label">9</div><div class="rank-label">8</div><div class="rank-label">7</div>
+          <div class="rank-label">6</div><div class="rank-label">5</div><div class="rank-label">4</div>
+          <div class="rank-label">3</div><div class="rank-label">2</div><div class="rank-label">1</div>
+        </div>
+        <div id="board" aria-label="Chess board"></div>
       </div>
       <div class="file-labels" aria-hidden="true">
         <div class="file-label">a</div><div class="file-label">b</div><div class="file-label">c</div>
@@ -318,1233 +592,767 @@ img.piece{width:66px;height:66px;user-select:none;pointer-events:none;}
         <div class="file-label">g</div><div class="file-label">h</div><div class="file-label">i</div>
       </div>
     </div>
-  </div>
 
-  <!-- Game Info (below) -->
-  <div class="game-info" id="gameInfo">
-    <div class="head">Game Info / Record</div>
-
-    <div class="info-grid">
-      <div class="box">
-        <div style="font-size:12px;color:#666;margin-bottom:6px">Turn</div>
-        <div id="infoTurn">White</div>
+    <aside class="info-panel">
+      <div class="status" id="statusBox">Mode: Human vs Online — Pawn placement not started</div>
+      <div class="small" id="pawnPhaseInfo">Pawn placement: —</div>
+      <div><strong class="small">Turn:</strong> <span id="turnInfo">—</span></div>
+      <div><strong class="small">Halfmove:</strong> <span id="halfmove">0</span></div>
+      <div style="margin-top:6px"><strong class="small">Moves:</strong></div>
+      <div class="moves" id="movesLog"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="btnClearHistory" class="action-btn ghost">Clear History</button>
+        <button id="btnExport" class="action-btn ghost">Export FEN</button>
       </div>
-      <div class="box">
-        <div style="font-size:12px;color:#666;margin-bottom:6px">Halfmove</div>
-        <div id="infoHalfmove">0</div>
-      </div>
-    </div>
-
-    <div style="margin-top:8px;">
-      <div style="font-size:12px;color:#666;margin-bottom:6px">Pawn Placement</div>
-      <div id="infoPawnPlace" class="box" style="background:#fff;margin-top:0;padding:10px;">White's Pawn</div>
-    </div>
-
-    <div id="status" class="status" style="margin-top:10px;"></div>
-
-    <div class="moves" id="movesContainer"><ol id="movesList" style="margin:0;padding-left:18px;"></ol></div>
-
-    <div class="footer"> " Welcome " </div>
+      <div style="margin-top:8px" class="small">TheGrandChess9</div>
+    </aside>
   </div>
 
-   <!-- Promotion Modal -->
-  <div id="promoModal" class="modal" style="display:none;">
-    <div class="modal-card" id="promoCard">
-      <div style="font-weight:700;margin-right:8px;">Promote to:</div>
-      <span class="promo-piece" data-piece="q"><img src="img/wq.png" alt="Q"></span>
-      <span class="promo-piece" data-piece="r"><img src="img/wr.png" alt="R"></span>
-      <span class="promo-piece" data-piece="b"><img src="img/wb.png" alt="B"></span>
-      <span class="promo-piece" data-piece="n"><img src="img/wn.png" alt="N"></span>
-    </div>
+  <footer>Enjoy — TheGrandChess9 (modern rebuild)</footer>
+</div>
+
+<div id="promoModal">
+  <div class="promoCard">
+    <div style="font-weight:800;color:var(--white)">Promote to:</div>
+    <img src="img/wq.png" data-piece="q" class="promoOpt">
+    <img src="img/wr.png" data-piece="r" class="promoOpt">
+    <img src="img/wb.png" data-piece="b" class="promoOpt">
+    <img src="img/wn.png" data-piece="n" class="promoOpt">
   </div>
+</div>
 
 <script>
-/* ------------------------------
-   Game Variables & Helpers
-   ------------------------------ */
-const BOARD_SIZE = 9;
-const boardEl = document.getElementById('chessboard');
-const statusEl = document.getElementById('status');
-const movesListEl = document.getElementById('movesList');
+const files = ['a','b','c','d','e','f','g','h','i'];
+const ranks = ['9','8','7','6','5','4','3','2','1'];
+
+const boardEl = document.getElementById('board');
+const statusBox = document.getElementById('statusBox');
+const pawnPhaseInfo = document.getElementById('pawnPhaseInfo');
+const turnInfo = document.getElementById('turnInfo');
+const halfmoveEl = document.getElementById('halfmove');
+const movesLog = document.getElementById('movesLog');
 const promoModal = document.getElementById('promoModal');
-const promoCard = document.getElementById('promoCard');
-const infoTurn = document.getElementById('infoTurn');
-const infoHalfmove = document.getElementById('infoHalfmove');
-const infoPawnPlace = document.getElementById('infoPawnPlace');
-const modeStatusEl = document.getElementById('modeStatus');
-const aiThinkingEl = document.getElementById('aiThinking');
-const aiPerformanceEl = document.getElementById('aiPerformance');
-const aiLevelSelector = document.getElementById('aiLevelSelector');
-const aiLevelSelect = document.getElementById('aiLevel');
+const roomBadge = document.getElementById('roomBadge');
 
-const PIECE_IMG = {
-  w: { p:'wp.png', r:'wr.png', n:'wn.png', b:'wb.png', q:'wq.png', k:'wk.png', s:'ws.png', c:'wc.png' },
-  b: { p:'bp.png', r:'br.png', n:'bn.png', b:'bb.png', q:'bq.png', k:'bk.png', s:'bs.png', c:'bc.png' }
-};
+const btnHvh = document.getElementById('btnHvh');
+const btnHvc = document.getElementById('btnHvc');
+const btnHvo = document.getElementById('btnHvo');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const undoBtn = document.getElementById('undoBtn');
+const flipBtn = document.getElementById('flipBtn');
 
-let board = null;
+const btnClearHistory = document.getElementById('btnClearHistory');
+const btnExport = document.getElementById('btnExport');
+
+/* modes */
+let currentMode = 'hvo';
+let aiEnabled = false;
+let aiColor = 'b';
+let roomId = null;
+let localPlayerColor = null; // for HVO parent-assigned color
+
+/* game state */
+let boardState = {};
 let turn = 'w';
 let flipped = false;
 let selected = null;
-let legalMovesCache = [];
-let moveHistory = [];
-let lastMove = null;
+let legalMoves = [];
+let enPassantTarget = null;
 let halfmoveClock = 0;
 let fullmoveNumber = 1;
-let enPassantTarget = null;
+let moveHistory = [];
+let lastMove = null;
 
+/* pawn placement */
+let pawnPlacePhase = false;
+let pawnPlaceColor = 'w';
+let placedW = 0;
+let placedB = 0;
+const PLACEMENT_MAX = 2;
+
+/* special */
+let awaitingCharioteer = false;
+let charioteerAwaitColor = null;
 let pendingPromotion = null;
 
-let specialPawnPositionsWhite = [];
-let specialPawnPositionsBlack = [];
-let pawnChoosePhase = true;
-let pawnChooseColor = 'w';
-let pawnChooseCount = 0;
-
-let forcingCharioteerPhase = false;
-let kingColorNeedingC = null;
-
-let aiEnabled = false;
-let onlineEnabled = false;
-let aiColor = 'b';
-let currentMode = 'hvh'; // 'hvh' | 'hvc' | 'hvo'
-let aiLevel = 3; // Default to Hard level
-let aiTimeLimit = 2000; // 2 seconds for time-based search (reduced from 3)
-
-// Optimized transposition table with size limit
-const TRANSPOSITION_TABLE_SIZE = 10000;
-const transpositionTable = new Map();
-let nodesSearched = 0;
-let searchStartTime = 0;
-let searchTimeout = null;
-
-// Simplified piece-square tables for better performance
-const PAWN_TABLE = [
-  [0,  0,  0,  0,  0,  0,  0,  0,  0],
-  [50, 50, 50, 50, 50, 50, 50, 50, 50],
-  [10, 10, 20, 30, 30, 30, 20, 10, 10],
-  [5,  5, 10, 25, 25, 25, 10,  5,  5],
-  [0,  0,  0, 20, 20, 20,  0,  0,  0],
-  [5, -5,-10,  0,  0,  0,-10, -5,  5],
-  [5, 10, 10,-20,-20,-20, 10, 10,  5],
-  [0,  0,  0,  0,  0,  0,  0,  0,  0],
-  [0,  0,  0,  0,  0,  0,  0,  0,  0]
-];
-
-const KNIGHT_TABLE = [
-  [-50,-40,-30,-30,-30,-30,-30,-40,-50],
-  [-40,-20,  0,  0,  0,  0,  0,-20,-40],
-  [-30,  0, 10, 15, 15, 15, 10,  0,-30],
-  [-30,  5, 15, 20, 20, 20, 15,  5,-30],
-  [-30,  0, 15, 20, 20, 20, 15,  0,-30],
-  [-30,  5, 10, 15, 15, 15, 10,  5,-30],
-  [-30,  0,  5, 10, 10, 10,  5,  0,-30],
-  [-30,-10,  0,  0,  0,  0,  0,-10,-30],
-  [-50,-40,-30,-30,-30,-30,-30,-40,-50]
-];
-
-const BISHOP_TABLE = [
-  [-20,-10,-10,-10,-10,-10,-10,-10,-20],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  5, 10, 10, 10,  5,  0,-10],
-  [-10,  5,  5, 10, 10, 10,  5,  5,-10],
-  [-10,  0, 10, 10, 10, 10, 10,  0,-10],
-  [-10, 10, 10, 10, 10, 10, 10, 10,-10],
-  [-10,  5,  0,  0,  0,  0,  0,  5,-10],
-  [-10,  0,  5,  0,  0,  0,  5,  0,-10],
-  [-20,-10,-10,-10,-10,-10,-10,-10,-20]
-];
-
-const ROOK_TABLE = [
-  [0,  0,  0,  0,  0,  0,  0,  0,  0],
-  [5, 10, 10, 10, 10, 10, 10, 10,  5],
-  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
-  [0,  0,  0,  5,  5,  5,  0,  0,  0]
-];
-
-const QUEEN_TABLE = [
-  [-20,-10,-10, -5, -5, -5,-10,-10,-20],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
-  [-5,  0,  5,  5,  5,  5,  5,  0, -5],
-  [0,  0,  5,  5,  5,  5,  5,  0, -5],
-  [-10,  5,  5,  5,  5,  5,  5,  0,-10],
-  [-10,  0,  5,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-20,-10,-10, -5, -5, -5,-10,-10,-20]
-];
-
-const KING_TABLE = [
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-50,-40,-40,-30]
-];
-
-const CHARIOTEER_TABLE = [
-  [-20,-10,-10, -5,  0, -5,-10,-10,-20],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
-  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
-  [0,  0,  5, 10, 20, 10,  5,  0,  0],
-  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
-  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-20,-10,-10, -5,  0, -5,-10,-10,-20]
-];
-
-const SCEPTRE_TABLE = [
-  [-20,-10,-10, -5, -5, -5,-10,-10,-20],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
-  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
-  [0,  0,  5, 10, 10, 10,  5,  0,  0],
-  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
-  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
-  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
-  [-20,-10,-10, -5, -5, -5,-10,-10,-20]
-];
-
-const PIECE_VALUES={p:100,n:300,b:250,r:500,q:1000,k:20000,c:350,s:1800};
-
-/* ------------------------------
-   Initial board & render
-   ------------------------------ */
-function initialBoard(){
-  return [
-    [ {t:'r',c:'b'},{t:'b',c:'b'},{t:'n',c:'b'},{t:'s',c:'b'},{t:'k',c:'b'},{t:'q',c:'b'},{t:'b',c:'b'},{t:'n',c:'b'},{t:'r',c:'b'} ],
-    [ {t:'p',c:'b'},{t:'p',c:'b'},{t:'p',c:'b'},{t:'p',c:'b'},{t:'c',c:'b'},{t:'p',c:'b'},{t:'p',c:'b'},{t:'p',c:'b'},{t:'p',c:'b'} ],
-    new Array(BOARD_SIZE).fill(null),
-    new Array(BOARD_SIZE).fill(null),
-    new Array(BOARD_SIZE).fill(null),
-    new Array(BOARD_SIZE).fill(null),
-    new Array(BOARD_SIZE).fill(null),
-    [ {t:'p',c:'w'},{t:'p',c:'w'},{t:'p',c:'w'},{t:'p',c:'w'},{t:'c',c:'w'},{t:'p',c:'w'},{t:'p',c:'w'},{t:'p',c:'w'},{t:'p',c:'w'} ],
-    [ {t:'r',c:'w'},{t:'n',c:'w'},{t:'b',c:'w'},{t:'q',c:'w'},{t:'k',c:'w'},{t:'s',c:'w'},{t:'n',c:'w'},{t:'b',c:'w'},{t:'r',c:'w'} ],
-  ];
+/* helpers */
+function rcToCoord(r,c){ return files[c] + ranks[r]; }
+function coordToRC(coord){ return [ranks.indexOf(coord[1]), files.indexOf(coord[0])]; }
+function inside(r,c){ return r>=0 && r<9 && c>=0 && c<9; }
+function makePiece(code, startRank = null){ return { code, c: code[0], t: code[1], moved:false, promoted:false, startRank }; }
+function snapshotState(){ return JSON.parse(JSON.stringify({ boardState, turn, enPassantTarget, halfmoveClock, fullmoveNumber, lastMove, awaitingCharioteer, charioteerAwaitColor, pawnPlacePhase, pawnPlaceColor, placedW, placedB })); }
+function restoreState(s){
+  boardState = JSON.parse(JSON.stringify(s.boardState));
+  turn = s.turn; enPassantTarget = s.enPassantTarget; halfmoveClock = s.halfmoveClock; fullmoveNumber = s.fullmoveNumber;
+  lastMove = s.lastMove; awaitingCharioteer = s.awaitingCharioteer; charioteerAwaitColor = s.charioteerAwaitColor;
+  pawnPlacePhase = !!s.pawnPlacePhase; pawnPlaceColor = s.pawnPlaceColor || 'w';
+  placedW = s.placedW || 0; placedB = s.placedB || 0;
 }
 
-function render(){
+const PIECE_VALUES={p:100,n:300,b:200,r:400,q:600,k:20000,c:50,s:900};
+
+/* initial setup */
+function resetBoardState(){
+  boardState = {};
+  const b9 = ['br','bb','bn','bs','bk','bq','bb','bn','br'];
+  for(let i=0;i<9;i++) boardState[files[i]+'9'] = makePiece(b9[i], '9');
+  const b8 = ['bp','bp','bp','bp','bc','bp','bp','bp','bp'];
+  for(let i=0;i<9;i++) boardState[files[i]+'8'] = makePiece(b8[i], '8');
+  const w2 = ['wp','wp','wp','wp','wc','wp','wp','wp','wp'];
+  for(let i=0;i<9;i++) boardState[files[i]+'2'] = makePiece(w2[i], '2');
+  const w1 = ['wr','wn','wb','wq','wk','ws','wn','wb','wr'];
+  for(let i=0;i<9;i++) boardState[files[i]+'1'] = makePiece(w1[i], '1');
+}
+resetBoardState();
+
+/* render */
+function renderBoard(){
   boardEl.innerHTML = '';
-
-  let cHighlight = [];
-  if(forcingCharioteerPhase){
-    const king = findKing(kingColorNeedingC);
-    if(king){
-      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
-        if(dr===0&&dc===0) continue;
-        const tr = king[0]+dr, tc = king[1]+dc;
-        if(inside(tr,tc) && board[tr][tc]===null) cHighlight.push([tr,tc]);
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const uiCoord = rcToCoord(r,c);
+      let displayCoord = uiCoord;
+      if(flipped){
+        const [rr,cc] = coordToRC(uiCoord);
+        displayCoord = rcToCoord(8-rr, 8-cc);
       }
-    }
-  }
-
-  for(let r=0; r<BOARD_SIZE; r++){
-    for(let c=0; c<BOARD_SIZE; c++){
-      const displayR = flipped ? BOARD_SIZE-1-r : r;
-      const displayC = flipped ? BOARD_SIZE-1-c : c;
-      const sq = document.createElement('div');
-      sq.className = 'square ' + (((r+c)%2===0) ? 'light' : 'dark');
-      sq.dataset.r = r;
-      sq.dataset.c = c;
-
-      const p = board[displayR][displayC];
+      const cell = document.createElement('div');
+      cell.className = 'cell ' + (((r+c)%2===0) ? 'light' : 'dark');
+      cell.dataset.coord = displayCoord;
+      const p = boardState[displayCoord];
       if(p){
         const img = document.createElement('img');
         img.className = 'piece';
-        img.src = 'img/' + PIECE_IMG[p.c][p.t];
-        img.alt = '';
-        sq.appendChild(img);
+        img.src = 'img/' + p.code + '.png';
+        img.alt = p.code;
+        cell.appendChild(img);
       }
-
-      if(lastMove){
-        const lf = lastMove.from, lt = lastMove.to;
-        if((lf[0]===r && lf[1]===c) || (lt[0]===r && lt[1]===c)) sq.classList.add('last-move');
-      }
-
-      if(forcingCharioteerPhase && cHighlight.some(([tr,tc])=>tr===r&&tc===c)){
-        sq.classList.add('c-choose');
-      }
-
-      sq.onclick = ()=> onSquareClick(r,c);
-      boardEl.appendChild(sq);
+      if(lastMove && (lastMove.from === displayCoord || lastMove.to === displayCoord)) cell.classList.add('last-move');
+      cell.onclick = ()=> onCellClick(displayCoord);
+      boardEl.appendChild(cell);
     }
   }
-
-  updateInfoPanel();
-  setStatusBar();
-  renderMoves();
+  updateUI();
 }
 
-function updateInfoPanel(){
-  infoTurn.textContent = turn==='w' ? 'White' : 'Black';
-  infoHalfmove.textContent = halfmoveClock;
-  infoPawnPlace.textContent = pawnChoosePhase ? (pawnChooseColor==='w' ? "White's Pawn" : "Black's Pawn") : '—';
-}
-
-/* ------------------------------
-   Click / move handling
-   ------------------------------ */
-function onSquareClick(renderR,renderC){
-  if(forcingCharioteerPhase){
-    if(aiEnabled && kingColorNeedingC === aiColor) return;
-    let king = findKing(kingColorNeedingC);
-    if(!king) return;
-    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
-      if(dr===0&&dc===0) continue;
-      const tr = king[0]+dr, tc = king[1]+dc;
-      if(tr===renderR && tc===renderC && board[tr][tc]===null){
-        const cpos = findCharioteer(kingColorNeedingC);
-        if(cpos){
-          board[tr][tc] = {...board[cpos[0]][cpos[1]]};
-          board[cpos[0]][cpos[1]] = null;
-        }
-        forcingCharioteerPhase=false; kingColorNeedingC=null;
-        render();
-        if (aiEnabled && turn === aiColor) {
-          setTimeout(() => maybeAIMove(), 80);
-        }
-      }
-    }
-    return;
+/* update UI */
+function updateUI(){
+  const modeText = (currentMode==='hvh') ? 'Human vs Human' : (currentMode==='hvc') ? 'Human vs Computer' : 'Human vs Online';
+  if(pawnPlacePhase){
+    statusBox.textContent = `Mode: ${modeText} — Pawn placement: ${pawnPlaceColor === 'w' ? 'White' : 'Black' } (${ (pawnPlaceColor==='w') ? (PLACEMENT_MAX - placedW) : (PLACEMENT_MAX - placedB) } left)`;
+    pawnPhaseInfo.textContent = `Place ${ (pawnPlaceColor==='w') ? (PLACEMENT_MAX - placedW) : (PLACEMENT_MAX - placedB) } pawn(s) on rank ${ pawnPlaceColor === 'w' ? '3' : '7' }`;
+  } else {
+    statusBox.textContent = `Mode: ${modeText} — ${turn === 'w' ? 'White' : 'Black'} to move`;
+    pawnPhaseInfo.textContent = `Pawn placement complete (W:${placedW} B:${placedB})`;
   }
+  turnInfo.textContent = turn === 'w' ? 'White' : 'Black';
+  halfmoveEl.textContent = halfmoveClock;
 
-  if(pawnChoosePhase){
-    const allowedRow = pawnChooseColor === 'w' ? (BOARD_SIZE - 3) : 2;
-    if(renderR !== allowedRow) return;
-    if(board[renderR][renderC] !== null) return;
-    board[renderR][renderC] = { t:'p', c: pawnChooseColor, special:true };
-    if(pawnChooseColor==='w') specialPawnPositionsWhite.push([renderR,renderC]);
-    else specialPawnPositionsBlack.push([renderR,renderC]);
-    pawnChooseCount++;
-    if(pawnChooseCount < 2){ render(); return; }
-    if(pawnChooseColor === 'w'){
-      pawnChooseColor = 'b'; pawnChooseCount = 0; render();
-      if(aiEnabled && pawnChooseColor === aiColor) setTimeout(()=>aiAutoPlaceTwoPawns(aiColor), 120);
-    }else{
-      pawnChoosePhase = false; pawnChooseColor = 'w'; pawnChooseCount = 0; turn = 'w';
-      render();
-      checkCharioteerNeeded();
-    }
-    return;
-  }
-
-  const modelR = flipped ? BOARD_SIZE-1-renderR : renderR;
-  const modelC = flipped ? BOARD_SIZE-1-renderC : renderC;
-  const piece = board[modelR][modelC];
-
+  document.querySelectorAll('.cell').forEach(el => el.classList.remove('selected','highlight','c-choose'));
   if(selected){
-    const legal = legalMovesCache.find(m=>m.from[0]===selected[0]&&m.from[1]===selected[1]&&m.to[0]===modelR&&m.to[1]===modelC);
-    if(legal){
-      if(legal.special === 'promotion'){
-        if(aiEnabled && turn === aiColor){
-          legal.promotionTo = legal.promotionTo || 'q';
-          applyMove(legal);
-          // ensure stale selection cleared
-          selected = null; legalMovesCache = []; pendingPromotion = null;
-          render(); setTimeout(()=> maybeAIMove(), 60);
-          return;
-        } else {
-          pendingPromotion = {...legal};
-          // prepare promo modal images based on color (optional)
-          updatePromoImagesForColor(pendingPromotion.piece.c);
-          promoModal.style.display = 'flex';
-          return;
+    const sel = document.querySelector(`.cell[data-coord="${selected}"]`);
+    if(sel) sel.classList.add('selected');
+    for(const m of legalMoves){
+      const tEl = document.querySelector(`.cell[data-coord="${m.to}"]`);
+      if(tEl) tEl.classList.add('highlight');
+    }
+  }
+
+  if(awaitingCharioteer){
+    const king = findKing(charioteerAwaitColor);
+    if(king){
+      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+        if(dr===0 && dc===0) continue;
+        const tr = king[0]+dr, tc = king[1]+dc;
+        if(inside(tr,tc)){
+          const coord = rcToCoord(tr,tc);
+          const el = document.querySelector(`.cell[data-coord="${coord}"]`);
+          if(el && !boardState[coord]) el.classList.add('c-choose');
         }
       }
-      applyMove(legal);
-      selected = null; legalMovesCache = [];
-      render(); setTimeout(()=> maybeAIMove(), 60);
+    }
+  }
+
+  movesLog.innerHTML = '';
+  const list = moveHistory.map(h=> moveToAlgebraic(h.move));
+  for(let i=0;i<list.length;i+=2){
+    const li = document.createElement('div');
+    li.textContent = ((i/2)+1) + '. ' + (list[i]||'') + (list[i+1] ? '  ' + list[i+1] : '');
+    movesLog.appendChild(li);
+  }
+}
+
+/* Pawn placement */
+function startPawnPlacement(){
+  resetBoardState();
+  pawnPlacePhase = true; pawnPlaceColor = 'w'; placedW = 0; placedB = 0;
+  selected = null; legalMoves = []; enPassantTarget = null; moveHistory = []; lastMove = null; awaitingCharioteer = false;
+  renderBoard();
+  if(currentMode === 'hvc' && aiColor === 'w'){ setTimeout(()=> aiAutoPlaceTwo('w'), 120); }
+  postStateToParent();
+}
+startBtn.onclick = startPawnPlacement;
+
+function handlePawnPlacement(coord){
+  if(!pawnPlacePhase) return;
+  const allowedRank = pawnPlaceColor === 'w' ? '3' : '7';
+  if(coord[1] !== allowedRank) return;
+  if(boardState[coord]) return;
+  if(currentMode === 'hvo' && localPlayerColor){
+    if(localPlayerColor !== pawnPlaceColor) return;
+  }
+  boardState[coord] = makePiece(pawnPlaceColor + 'p', null);
+  if(pawnPlaceColor === 'w') placedW++; else placedB++;
+  renderBoard();
+  postStateToParent();
+  if(pawnPlaceColor === 'w' && placedW >= PLACEMENT_MAX){
+    pawnPlaceColor = 'b';
+    if(currentMode === 'hvc' && aiColor === 'b'){ setTimeout(()=> aiAutoPlaceTwo('b'), 120); }
+    renderBoard(); postStateToParent(); return;
+  }
+  if(pawnPlaceColor === 'b' && placedB >= PLACEMENT_MAX){
+    pawnPlacePhase = false; pawnPlaceColor = 'b'; turn = 'w'; renderBoard(); postStateToParent(); return;
+  }
+}
+
+/* AI pawn auto placement */
+function aiAutoPlaceTwo(color){
+  if(!pawnPlacePhase) return;
+  const allowedRank = color === 'w' ? '3' : '7';
+  const pref = ['e','d','f','c','g','b','h','a','i'];
+  let placed = 0;
+  for(const f of pref){
+    const coord = f + allowedRank;
+    if(!boardState[coord]){
+      boardState[coord] = makePiece(color+'p', null);
+      placed++; if(placed >= PLACEMENT_MAX) break;
+    }
+  }
+  if(color === 'w') placedW += placed; else placedB += placed;
+  if(color === 'w'){
+    pawnPlaceColor = 'b'; renderBoard(); postStateToParent();
+    if(currentMode==='hvc' && aiColor==='b') setTimeout(()=> aiAutoPlaceTwo('b'), 150);
+  } else {
+    pawnPlacePhase = false; turn = 'w'; renderBoard(); postStateToParent();
+  }
+}
+
+/* Selection & clicks */
+function onCellClick(coord){
+
+
+if (!pawnPlacePhase && (placedW < 2 || placedB < 2)) {
+    document.getElementById("setupMsg").style.display = "flex";
+    return;
+  }
+
+
+
+  if(pawnPlacePhase){
+    if(currentMode === 'hvc' && pawnPlaceColor === aiColor) return;
+    if(currentMode === 'hvo' && localPlayerColor){
+      if(localPlayerColor !== pawnPlaceColor) return;
+    }
+    handlePawnPlacement(coord); return;
+  }
+  if(pendingPromotion) return;
+  if(awaitingCharioteer){
+    const p = boardState[coord];
+    if(!selected){
+      if(p && p.t === 'c' && p.c === charioteerAwaitColor){
+        selected = coord; legalMoves = generateLegalMovesForSquare(selected); updateUI();
+      }
+      return;
+    } else {
+      const mv = legalMoves.find(m=> m.to === coord);
+      if(mv){
+        applyMoveAndSync(mv);
+        awaitingCharioteer = false; charioteerAwaitColor = null;
+        selected = null; legalMoves = []; renderBoard();
+      } else { selected = null; legalMoves = []; updateUI(); }
       return;
     }
   }
 
-  if(piece && piece.c === turn){
-    selected = [modelR, modelC];
-    legalMovesCache = generateLegalMovesForSquare(modelR, modelC);
-    render();
-    highlightSelection(selected, legalMovesCache);
+  const p = boardState[coord];
+
+  // FIX 2: HVO me sirf apne color ki turn par hi move allow
+  if(currentMode === 'hvo' && localPlayerColor){
+    if(turn !== localPlayerColor) return;
+  }
+
+  if(!selected){
+    if(!p) return;
+
+    // FIX 2: HVO me opponent piece select hi nahi kar sakta
+    if(currentMode === 'hvo' && localPlayerColor){
+      if(p.c !== localPlayerColor) return;
+    }
+
+    if(p.c !== turn) return;
+    selected = coord; legalMoves = generateLegalMovesForSquare(selected); updateUI(); return;
   } else {
-    selected = null; legalMovesCache = []; render();
+    if(p && p.c === turn){
+      selected = coord; legalMoves = generateLegalMovesForSquare(selected); updateUI(); return;
+    }
+    const mv = legalMoves.find(m => m.to === coord);
+    if(!mv){ selected = null; legalMoves = []; updateUI(); return; }
+    if(mv.special === 'promotion'){ pendingPromotion = mv; openPromotionModal(mv.piece.c); return; }
+    applyMoveAndSync(mv);
+    selected = null; legalMoves = [];
+    renderBoard();
+    if(currentMode === 'hvc' && turn === aiColor) setTimeout(()=> aiMakeMove(), 220);
   }
 }
 
-function highlightSelection(sel, moves){
-  const sqs = boardEl.querySelectorAll('.square');
-  sqs.forEach(el=>el.classList.remove('selected','highlight'));
-  const selR = flipped ? BOARD_SIZE-1-sel[0] : sel[0];
-  const selC = flipped ? BOARD_SIZE-1-sel[1] : sel[1];
-  const selEl = Array.from(sqs).find(e=>parseInt(e.dataset.r)===selR && parseInt(e.dataset.c)===selC);
-  if(selEl) selEl.classList.add('selected');
-
-  for(const m of moves){
-    const dr = flipped ? BOARD_SIZE-1-m.to[0] : m.to[0];
-    const dc = flipped ? BOARD_SIZE-1-m.to[1] : m.to[1];
-    const el = Array.from(sqs).find(e=>parseInt(e.dataset.r)===dr && parseInt(e.dataset.c)===dc);
-    if(el) el.classList.add('highlight');
+/* Move generation */
+function generatePseudoMovesForPawn(from){
+  const p = boardState[from]; if(!p) return [];
+  const [fr,fc] = coordToRC(from);
+  const dir = (p.c === 'w') ? -1 : 1;
+  const moves = [];
+  const oneR = fr + dir, twoR = fr + 2*dir;
+  if(inside(oneR,fc) && !boardState[rcToCoord(oneR,fc)]){
+    if((p.c === 'w' && oneR === 0) || (p.c === 'b' && oneR === 8)){
+      moves.push({ from, to: rcToCoord(oneR,fc), piece: p, special:'promotion' });
+    } else {
+      moves.push({ from, to: rcToCoord(oneR,fc), piece: p });
+      if(!p.moved && !p.promoted && (p.startRank === '2' || p.startRank === '8')){
+        const curRank = from[1];
+        if(curRank === p.startRank && inside(twoR,fc) && !boardState[rcToCoord(twoR,fc)]) moves.push({ from, to: rcToCoord(twoR,fc), piece: p, special:'double' });
+      }
+    }
   }
+  for(const dc of [-1,1]){
+    const tr = fr + dir, tc = fc + dc;
+    if(!inside(tr,tc)) continue;
+    const to = rcToCoord(tr,tc);
+    const t = boardState[to];
+    if(t && t.c !== p.c && t.t !== 'c'){
+      if((p.c === 'w' && tr === 0) || (p.c === 'b' && tr === 8)) moves.push({ from, to, piece: p, captured: t, special:'promotion' });
+      else moves.push({ from, to, piece: p, captured: t });
+    } else {
+      if(enPassantTarget === to) moves.push({ from, to, piece: p, special:'enpassant' });
+    }
+  }
+  return moves;
 }
 
-/* ------------------------------
-   Move generation & legality
-   ------------------------------ */
-function generateLegalMovesForSquare(r,c){
-  const piece = board[r][c];
-  if(!piece || piece.c !== turn) return [];
-  const moves = generatePseudoMoves(r,c);
+function generatePseudoMovesForSquareCoord(coord){
+  const p = boardState[coord]; if(!p) return [];
+  const type = p.t;
+  if(type === 'p') return generatePseudoMovesForPawn(coord);
+  const [r,c] = coordToRC(coord);
+  const list = [];
+  function push(fr,fc,tr,tc,special=null){
+    if(!inside(tr,tc)) return;
+    const to = rcToCoord(tr,tc), target = boardState[to];
+    if(target && target.t === 'c' && type !== 'c') return;
+    if(type === 'c' && target) return;
+    if(!target || target.c !== p.c) list.push({ from: rcToCoord(fr,fc), to, piece: p, captured: target?target:null, special});
+  }
+  if(type === 'n' || type === 's'){
+    const deltas = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
+    for(const [dr,dc] of deltas) push(r,c,r+dr,c+dc);
+    if(type === 'n') return list;
+  }
+  if(type === 'r' || type === 'q' || type === 's'){
+    const orth = [[1,0],[-1,0],[0,1],[0,-1]];
+    for(const [dr,dc] of orth){
+      let tr=r+dr, tc=c+dc;
+      while(inside(tr,tc)){
+        const to = rcToCoord(tr,tc);
+        if(!boardState[to]) { push(r,c,tr,tc); } else { if(boardState[to].t !== 'c' && boardState[to].c !== p.c) push(r,c,tr,tc); break; }
+        tr+=dr; tc+=dc;
+      }
+    }
+  }
+  if(type === 'b' || type === 'q' || type === 's'){
+    const diag = [[1,1],[1,-1],[-1,1],[-1,-1]];
+    for(const [dr,dc] of diag){
+      let tr=r+dr, tc=c+dc;
+      while(inside(tr,tc)){
+        const to = rcToCoord(tr,tc);
+        if(!boardState[to]) { push(r,c,tr,tc); } else { if(boardState[to].t !== 'c' && boardState[to].c !== p.c) push(r,c,tr,tc); break; }
+        tr+=dr; tc+=dc;
+      }
+    }
+  }
+  if(type === 'c'){
+    const king = findKing(p.c);
+    if(!king) return list;
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+      if(dr===0 && dc===0) continue;
+      const tr = king[0]+dr, tc = king[1]+dc;
+      if(inside(tr,tc) && !boardState[rcToCoord(tr,tc)]) push(r,c,tr,tc);
+    }
+  }
+  if(type === 'k'){
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+      if(dr===0 && dc===0) continue;
+      const tr=r+dr, tc=c+dc;
+      if(!inside(tr,tc)) continue;
+      const to = rcToCoord(tr,tc);
+      const tt = boardState[to];
+      if(!tt || tt.c !== p.c){
+        if(tt && tt.t === 'c') continue;
+        list.push({ from: rcToCoord(r,c), to, piece: p, captured: tt?tt:null});
+      }
+    }
+  }
+  return list;
+}
+
+/* legal filter */
+function generateLegalMovesForSquare(coord){
+  const p = boardState[coord]; if(!p) return [];
+  const pseudo = generatePseudoMovesForSquareCoord(coord);
   const legal = [];
-  for(const m of moves){
-    const snap = snapshotState();
-    makeMoveOnBoard(m);
-    const inCheck = isKingInCheck(piece.c);
-    restoreState(snap);
+  for(const m of pseudo){
+    const snapshot = snapshotState();
+    makeMoveOnState(m);
+    const inCheck = isKingInCheck(p.c);
+    restoreState(snapshot);
     if(!inCheck) legal.push(m);
   }
   return legal;
 }
 
-function generatePseudoMoves(r,c){
-  const p = board[r][c]; if(!p) return [];
-  const moves = [], color = p.c, dir = color === 'w' ? -1 : 1;
+/* apply move on state */
+function makeMoveOnState(m){
+  const from = m.from, to = m.to;
+  const piece = boardState[from];
+  if(!piece) return;
+  if(m.special === 'enpassant'){
+    const [tr,tc] = coordToRC(to);
+    const capR = (piece.c === 'w') ? tr+1 : tr-1;
+    const capCoord = rcToCoord(capR,tc);
+    delete boardState[capCoord];
+  }
+  if(boardState[to]) delete boardState[to];
+  boardState[to] = JSON.parse(JSON.stringify(piece));
+  boardState[to].moved = true;
+  if(m.special === 'promotion'){
+    boardState[to].promoted = true;
+    const promotedTo = m.promotionTo || 'q';
+    boardState[to].t = promotedTo;
+    boardState[to].code = boardState[to].c + promotedTo;
+  }
+  delete boardState[from];
+  if(m.special === 'double'){
+    const [fr,fc] = coordToRC(from); const [tr,tc] = coordToRC(to);
+    const midR = Math.round((fr+tr)/2);
+    enPassantTarget = rcToCoord(midR, fc);
+  } else { enPassantTarget = null; }
+}
 
-  function pushMove(toR,toC,special=null){
-    if(!inside(toR,toC)) return;
-    const target = board[toR][toC];
-    if(target && target.t === 'c') return;
-    if(p.t === 'c'){
-      if(target === null) moves.push({from:[r,c],to:[toR,toC],piece:{...p},captured:null,special});
+/* APPLY MOVE (with charioteer handling, original logic kept) */
+function applyMove(m){
+  const snap = snapshotState();
+  makeMoveOnState(m);
+  lastMove = { from: m.from, to: m.to };
+  if((m.piece && m.piece.t === 'p') || m.captured) halfmoveClock = 0; else halfmoveClock++;
+
+  const movedPiece = m.piece || (boardState[m.to] ? boardState[m.to] : null);
+
+  if(movedPiece && movedPiece.t === 'k'){
+    const color = movedPiece.c;
+    const kingPos = findKing(color);
+    const cpos = findCharioteer(color);
+
+    if(cpos && !isAdjacent(kingPos, cpos)){
+      if(currentMode === 'hvc' && aiColor === color){
+        moveHistory.push({ snapshot: snap, move: m });
+        const targets = [];
+        const pref = [[0,0],[0,-1],[0,1],[ -1,0],[1,0],[-1,-1],[-1,1],[1,-1],[1,1]];
+        for(const [dr,dc] of pref){
+          const tr = kingPos[0] + dr, tc = kingPos[1] + dc;
+          if(inside(tr,tc)){
+            const coord = rcToCoord(tr,tc);
+            if(!boardState[coord]) targets.push(coord);
+          }
+        }
+        if(targets.length){
+          const fromCoord = rcToCoord(cpos[0], cpos[1]);
+          const toCoord = targets[0];
+          const chMove = { from: fromCoord, to: toCoord, piece: boardState[fromCoord] };
+
+          makeMoveOnState(chMove);
+          const snapAfterCh = snapshotState();
+          moveHistory.push({ snapshot: snapAfterCh, move: chMove });
+
+          awaitingCharioteer = false; charioteerAwaitColor = null;
+          lastMove = { from: chMove.from, to: chMove.to };
+          flipTurnAfterMove();
+          postStateToParent();
+          renderBoard();
+          return;
+        }
+      }
+      awaitingCharioteer = true;
+      charioteerAwaitColor = color;
+      moveHistory.push({ snapshot: snap, move: m });
+      postStateToParent();
+      renderBoard();
       return;
     }
-    moves.push({from:[r,c],to:[toR,toC],piece:{...p},captured: target ? {...target} : null, special});
   }
 
-  if(p.t === 'p'){
-    const isSpecial = p.special === true;
-    const oneR = r + dir;
-    if(inside(oneR,c) && !board[oneR][c]){
-      if((color==='w' && oneR===0) || (color==='b' && oneR===BOARD_SIZE-1)){
-        moves.push({from:[r,c],to:[oneR,c],piece:{...p},captured:null,special:'promotion'});
-      } else {
-        pushMove(oneR,c);
-        const twoR = r + 2*dir;
-        if((color==='w' && r===BOARD_SIZE-2) || (color==='b' && r===1)){
-          if(inside(twoR,c) && !board[twoR][c] && !isSpecial){
-            pushMove(twoR,c,'double');
-          }
-        }
-      }
-    }
-    for(const dc of [-1,1]){
-      const tr = r + dir, tc = c + dc;
-      if(inside(tr,tc)){
-        const t = board[tr][tc];
-        if(t && t.c !== color && t.t !== 'c'){
-          if((color==='w' && tr===0) || (color==='b' && tr===BOARD_SIZE-1)){
-            moves.push({from:[r,c],to:[tr,tc],piece:{...p},captured:{...t},special:'promotion'});
-          } else {
-            pushMove(tr,tc);
-          }
-        } else if(enPassantTarget && tr === enPassantTarget[0] && tc === enPassantTarget[1]){
-          const capR = r; const capC = tc;
-          if(board[capR][capC] && board[capR][capC].t === 'p' && board[capR][capC].c !== color){
-            moves.push({from:[r,c],to:[tr,tc],piece:{...p},captured:{...board[capR][capC]},special:'enpassant'});
-          }
-        }
-      }
+  if(movedPiece && movedPiece.t === 'c' && awaitingCharioteer && charioteerAwaitColor === movedPiece.c){
+    const kingPos = findKing(movedPiece.c);
+    const cpos = findCharioteer(movedPiece.c);
+    if(cpos && isAdjacent(kingPos,cpos)){
+      awaitingCharioteer = false; charioteerAwaitColor = null;
+      flipTurnAfterMove();
+      moveHistory.push({ snapshot: snap, move: m });
+      postStateToParent();
+      renderBoard();
+      return;
     }
   }
 
-  if(p.t === 'n' || p.t === 's'){
-    const deltas = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
-    for(const [dr,dc] of deltas){
-      const tr = r + dr, tc = c + dc;
-      if(!inside(tr,tc)) continue;
-      if(!board[tr][tc] || board[tr][tc].c !== color) pushMove(tr,tc);
-    }
-  }
-
-  if(p.t === 'b' || p.t === 'q' || p.t === 's'){
-    const dirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
-    for(const [dr,dc] of dirs){
-      let tr=r+dr, tc=c+dc;
-      while(inside(tr,tc)){
-        if(!board[tr][tc]) { pushMove(tr,tc); }
-        else { if(board[tr][tc].c !== color && board[tr][tc].t !== 'c') pushMove(tr,tc); break; }
-        tr += dr; tc += dc;
-      }
-    }
-  }
-
-  if(p.t === 'r' || p.t === 'q' || p.t === 's'){
-    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-    for(const [dr,dc] of dirs){
-      let tr=r+dr, tc=c+dc;
-      while(inside(tr,tc)){
-        if(!board[tr][tc]) { pushMove(tr,tc); }
-        else { if(board[tr][tc].c !== color && board[tr][tc].t !== 'c') pushMove(tr,tc); break; }
-        tr += dr; tc += dc;
-      }
-    }
-  }
-
-  if(p.t === 'c'){
-    const kingPos = findKing(p.c);
-    if(kingPos){
-      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
-        if(dr===0 && dc===0) continue;
-        const tr = kingPos[0]+dr, tc = kingPos[1]+dc;
-        if(inside(tr,tc) && board[tr][tc]===null && !(tr===r && tc===c)) pushMove(tr,tc);
-      }
-    }
-  }
-  if(p.t === 'k'){
-    for(let dr=-1;dr<=1;dr++){
-      for(let dc=-1;dc<=1;dc++){
-        if(dr===0 && dc===0) continue;
-        const tr = r+dr, tc = c+dc;
-        if(!inside(tr,tc)) continue;
-        if(!board[tr][tc] || board[tr][tc].c !== color) pushMove(tr,tc);
-      }
-    }
-  }
-  return moves;
+  flipTurnAfterMove();
+  moveHistory.push({ snapshot: snap, move: m });
+  postStateToParent();
 }
 
-/* ------------------------------
-   Game state helpers
-   ------------------------------ */
-function inside(r,c){return r>=0&&r<BOARD_SIZE&&c>=0&&c<BOARD_SIZE;}
-function findKing(color){ for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++){ const p=board[r][c]; if(p && p.t==='k' && p.c===color) return [r,c]; } return null; }
-function findCharioteer(color){ for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++){ const p=board[r][c]; if(p && p.t==='c' && p.c===color) return [r,c]; } return null; }
-function isAdjacent(a,b){ return Math.abs(a[0]-b[0])<=1 && Math.abs(a[1]-b[1])<=1; }
+/* wrapper */
+function applyMoveAndSync(m){ applyMove(m); }
 
-function snapshotState(){
-  return {
-    board: board.map(row => row.map(cell => cell ? {...cell} : null)),
-    turn, lastMove: lastMove ? {...lastMove} : null,
-    enPassantTarget: enPassantTarget ? [...enPassantTarget] : null,
-    halfmoveClock, fullmoveNumber
-  };
-}
-function restoreState(s){
-  board = s.board.map(row=>row.map(cell=>cell?{...cell}:null));
-  turn = s.turn;
-  lastMove = s.lastMove ? {...s.lastMove} : null;
-  enPassantTarget = s.enPassantTarget ? [...s.enPassantTarget] : null;
-  halfmoveClock = s.halfmoveClock;
-  fullmoveNumber = s.fullmoveNumber;
-}
-
-/* ------------------------------
-   Make / apply / undo moves
-   ------------------------------ */
-function makeMoveOnBoard(m){
-  const [fr,fc] = m.from, [tr,tc] = m.to;
-  const piece = board[fr][fc];
-  m.captured = board[tr][tc] ? {...board[tr][tc]} : m.captured;
-
-  board[tr][tc] = {...piece};
-  board[fr][fc] = null;
-
-  if(m.special === 'promotion'){
-    const promoteTo = m.promotionTo || 'q';
-    board[tr][tc].t = promoteTo;
-    // ensure special flag removed if present
-    if(board[tr][tc].special) delete board[tr][tc].special;
-  }
-
-  if(m.special === 'enpassant'){
-    const capR = fr;
-    const capC = tc;
-    board[capR][capC] = null;
-  }
-
-  if(piece.t === 'p' && Math.abs(tr - fr) === 2){
-    enPassantTarget = [(fr + tr) / 2, fc];
-  } else {
-    enPassantTarget = null;
-  }
-}
-
-function applyMove(move){
-  const snapshot = snapshotState();
-  makeMoveOnBoard(move);
-  moveHistory.push({ move, snapshot });
-  lastMove = { from: move.from.slice(), to: move.to.slice() };
-  if(move.piece.t === 'p' || move.captured) halfmoveClock = 0; else halfmoveClock++;
-  if(turn === 'b') fullmoveNumber++;
-  turn = (turn === 'w') ? 'b' : 'w';
-
-  // --- IMPORTANT: clear any stale UI selection/pending promotion state here ---
-  selected = null;
-  legalMovesCache = [];
-  pendingPromotion = null;
-
-  render();
-  checkCharioteerNeeded();
-}
-
-function undoMove(){
+/* undo/flip helpers */
+function undo(){
   if(moveHistory.length === 0) return;
   const last = moveHistory.pop();
   restoreState(last.snapshot);
-  render();
-  checkCharioteerNeeded();
+  renderBoard();
+}
+undoBtn.onclick = undo;
+
+function flipBoard(){ flipped = !flipped; renderBoard(); }
+flipBtn.onclick = flipBoard;
+
+function flipTurnAfterMove(){
+  if(turn === 'b') fullmoveNumber++;
+  turn = (turn === 'w') ? 'b' : 'w';
+  renderBoard();
 }
 
-/* ------------------------------
-   Check / mate / stalemate
-   ------------------------------ */
-function generateAllLegalMovesForColor(color){
-  const moves = [];
-  for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++){
-    const p = board[r][c];
-    if(p && p.c === color){
-      const pseudo = generatePseudoMoves(r,c);
-      for(const m of pseudo){
-        const snap = snapshotState();
-        makeMoveOnBoard(m);
-        const inCheck = isKingInCheck(color);
-        restoreState(snap);
-        if(!inCheck) moves.push(m);
-      }
-    }
+/* find pieces */
+function findKing(color){
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+    const coord = rcToCoord(r,c);
+    const p = boardState[coord];
+    if(p && p.t === 'k' && p.c === color) return [r,c];
   }
-  return moves;
+  return null;
 }
+function findCharioteer(color){
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+    const coord = rcToCoord(r,c);
+    const p = boardState[coord];
+    if(p && p.t === 'c' && p.c === color) return [r,c];
+  }
+  return null;
+}
+function isAdjacent(a,b){ if(!a||!b) return false; return Math.abs(a[0]-b[0])<=1 && Math.abs(a[1]-b[1])<=1; }
 
+/* attack checks */
 function isKingInCheck(color){
-  const kingPos = findKing(color);
-  if(!kingPos) return true;
-  const [kr,kc] = kingPos;
-  const enemy = (color === 'w') ? 'b' : 'w';
-  for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++){
-    const p = board[r][c];
+  const king = findKing(color);
+  if(!king) return true;
+  const [kr,kc] = king;
+  const enemy = color === 'w' ? 'b' : 'w';
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+    const coord = rcToCoord(r,c); const p = boardState[coord];
     if(!p || p.c !== enemy) continue;
-    const pseudo = generatePseudoMoves(r,c);
-    for(const m of pseudo) if(m.to[0] === kr && m.to[1] === kc) return true;
+    const pseudo = generatePseudoMovesForSquareCoord(coord);
+    for(const mv of pseudo){
+      if(mv.to === rcToCoord(kr,kc)) return true;
+    }
   }
   return false;
 }
 
-function isCheckmate(color){
-  if(!isKingInCheck(color)) return false;
-  const legal = generateAllLegalMovesForColor(color);
-  return legal.length === 0;
-}
-function isStalemate(color){
-  if(isKingInCheck(color)) return false;
-  const legal = generateAllLegalMovesForColor(color);
-  return legal.length === 0;
-}
-
-/* ------------------------------
-   Status / moves display
-   ------------------------------ */
-function setStatusBar(){
-  let s = '', c = '';
-  if(forcingCharioteerPhase){
-    s = (kingColorNeedingC === 'w' ? 'White' : 'Black') + ': Place Charioteer near King!';
-    c = ' cmsg';
-  } else if(pawnChoosePhase){
-    s = 'Special Pawn Placement Phase'; c = '';
-  } else {
-    const inCheck = isKingInCheck(turn);
-    const mate = isCheckmate(turn);
-    const stale = isStalemate(turn);
-    if(mate){ s = (turn==='w'?'White':'Black') + ' is checkmated! ' + (turn==='w'?'Black':'White') + ' wins!'; c=' mate'; }
-    else if(stale){ s = 'Stalemate — Draw'; c=' stale'; }
-    else if(inCheck){ s = (turn==='w'?'White':'Black') + ' is in check!'; c=' check'; }
-    else { s = (turn==='w'?'White':'Black') + "'s turn"; c=''; }
+function generateAllLegalMovesForColor(color){
+  const out = [];
+  for(const coord in boardState){
+    if(boardState[coord].c !== color) continue;
+    const legal = generateLegalMovesForSquare(coord);
+    for(const m of legal) out.push(m);
   }
-  statusEl.textContent = s;
-  statusEl.className = 'status' + c;
+  return out;
 }
 
+/* algebraic & promotions */
 function moveToAlgebraic(m){
   const p = m.piece;
-  const cols = 'abcdefghi';
-  const from = cols[m.from[1]] + (BOARD_SIZE - m.from[0]);
-  const to = cols[m.to[1]] + (BOARD_SIZE - m.to[0]);
-  let prefix = (p.t === 'p') ? '' : p.t.toUpperCase();
+  const from = m.from, to = m.to;
+  if(!p) return from + '-' + to;
+  const pieceChar = p.t === 'p' ? '' : p.t.toUpperCase();
   const capture = m.captured ? 'x' : '-';
-  let suf = '';
-  if(m.special === 'promotion') suf = '=' + (m.promotionTo ? m.promotionTo.toUpperCase() : 'Q');
-  return (p.t === 'p' ? from + (m.captured ? 'x' + to : '-' + to) : prefix + from + capture + to) + suf;
+  const promo = m.special === 'promotion' ? '=' + (m.promotionTo?m.promotionTo.toUpperCase():'Q') : '';
+  return (p.t === 'p' ? from + (m.captured ? 'x' + to : '-' + to) : pieceChar + from + capture + to) + promo;
 }
 
-function renderMoves(){
-  movesListEl.innerHTML = '';
-  const arr = [];
-  for(let i=0;i<moveHistory.length;i++){
-    const m = moveHistory[i].move;
-    arr.push(moveToAlgebraic(m));
-  }
-  for(let i=0;i<arr.length;i+=2){
-    const li = document.createElement('li');
-    const white = arr[i]||'', black = arr[i+1]||'';
-    li.textContent = white + (black ? '  ' + black : '');
-    movesListEl.appendChild(li);
-  }
-}
-
-/* ------------------------------
-   OPTIMIZED POWERFUL AI
-   ------------------------------ */
-function moveOrderScore(m){
-  let score = 0;
-  if(m.captured) score += (PIECE_VALUES[m.captured.t] || 0) * 10;
-  if(m.special === 'promotion') score += 1000;
-  
-  // Center control bonus
-  const toC = m.to[1], centerBonus = 4 - Math.abs(4 - toC);
-  score += centerBonus * 5;
-  
-  // Check if move gives check (simplified check)
-  const snap = snapshotState();
-  makeMoveOnBoard(m);
-  if(isKingInCheck(turn === 'w' ? 'b' : 'w')) score += 50;
-  restoreState(snap);
-  
-  return score;
-}
-
-// Optimized evaluation function for better performance
-function evaluateBoard(forColor){
-  let score = 0;
-  let whiteMaterial = 0, blackMaterial = 0;
-  let whiteKingSafety = 0, blackKingSafety = 0;
-  let whiteCenterControl = 0, blackCenterControl = 0;
-  
-  // Material and simplified positional evaluation
-  for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++){
-    const p = board[r][c];
-    if(!p) continue;
-    
-    const val = PIECE_VALUES[p.t] || 0;
-    const isWhite = p.c === 'w';
-    
-    // Add material value
-    if(isWhite) {
-      whiteMaterial += val;
-    } else {
-      blackMaterial += val;
-    }
-    
-    // Simplified positional value
-    let positionalValue = 0;
-    const tableRow = isWhite ? r : BOARD_SIZE-1-r; // Flip table for black
-    
-    switch(p.t) {
-      case 'p':
-        positionalValue = PAWN_TABLE[tableRow][c];
-        break;
-      case 'n':
-        positionalValue = KNIGHT_TABLE[tableRow][c];
-        break;
-      case 'b':
-        positionalValue = BISHOP_TABLE[tableRow][c];
-        break;
-      case 'r':
-        positionalValue = ROOK_TABLE[tableRow][c];
-        break;
-      case 'q':
-        positionalValue = QUEEN_TABLE[tableRow][c];
-        break;
-      case 'k':
-        positionalValue = KING_TABLE[tableRow][c];
-        // Simplified king safety
-        if(isWhite) whiteKingSafety += 10;
-        else blackKingSafety += 10;
-        break;
-      case 'c':
-        positionalValue = CHARIOTEER_TABLE[tableRow][c];
-        // Charioteer is more valuable when protecting king
-        const kingPosC = findKing(p.c);
-        if(kingPosC && isAdjacent([r,c], kingPosC)) {
-          if(isWhite) whiteKingSafety += 20;
-          else blackKingSafety += 20;
-        }
-        break;
-      case 's':
-        positionalValue = SCEPTRE_TABLE[tableRow][c];
-        break;
-    }
-    
-    // Center control
-    if((r >= 3 && r <= 5) && (c >= 3 && c <= 5)) {
-      if(isWhite) whiteCenterControl += 5;
-      else blackCenterControl += 5;
-    }
-    
-    // Add positional value to score
-    score += isWhite ? positionalValue : -positionalValue;
-  }
-  
-  // Combine evaluation factors
-  const materialDiff = whiteMaterial - blackMaterial;
-  const kingSafetyDiff = whiteKingSafety - blackKingSafety;
-  const centerControlDiff = whiteCenterControl - blackCenterControl;
-  
-  // Weighted combination of factors
-  score = materialDiff + 
-          kingSafetyDiff * 2 + 
-          centerControlDiff * 2;
-  
-  // Return score from perspective of the requested color
-  return forColor === 'w' ? score : -score;
-}
-
-// Choose AI depth based on level (optimized)
-function chooseAIDepth(){
-  switch(aiLevel) {
-    case 1: return 2; // Easy
-    case 2: return 3; // Medium
-    case 3: return 4; // Hard
-    case 4: return 5; // Expert
-    case 5: return 6; // Master (will be time-limited)
-    default: return 4;
-  }
-}
-
-// Optimized time-based search with timeout
-function timeBasedSearch(color, timeLimit) {
-  const startTime = Date.now();
-  let bestMove = null;
-  let depth = 1;
-  
-  // Set timeout to prevent hanging
-  searchTimeout = setTimeout(() => {
-    console.log('AI search timeout reached');
-  }, timeLimit);
-  
-  // Iterative deepening with time limit
-  while (Date.now() - startTime < timeLimit && depth <= 6) {
-    const moves = generateAllLegalMovesForColor(color);
-    if (moves.length === 0) {
-      clearTimeout(searchTimeout);
-      return null;
-    }
-    
-    moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
-    let currentBestMove = null;
-    let currentBestScore = -Infinity;
-    
-    for (const m of moves) {
-      if (Date.now() - startTime >= timeLimit) break;
-      
-      const snap = snapshotState();
-      makeMoveOnBoard(m);
-      const score = minimax(depth-1, false, color, -Infinity, Infinity);
-      restoreState(snap);
-      
-      if (score > currentBestScore) {
-        currentBestScore = score;
-        currentBestMove = m;
-      }
-    }
-    
-    if (currentBestMove) {
-      bestMove = currentBestMove;
-    }
-    
-    depth++;
-  }
-  
-  clearTimeout(searchTimeout);
-  return bestMove;
-}
-
-// Enhanced AI move selection with performance monitoring
-function aiChooseMove(color){
-  let bestMove = null;
-  
-  // Show AI thinking indicator
-  aiThinkingEl.style.display = 'block';
-  aiPerformanceEl.style.display = 'block';
-  
-  const startTime = performance.now();
-  nodesSearched = 0;
-  
-  if (aiLevel === 5) { // Master level - time-based search
-    bestMove = timeBasedSearch(color, aiTimeLimit);
-  } else { // Other levels - depth-based search
-    const depth = chooseAIDepth();
-    const moves = generateAllLegalMovesForColor(color);
-    if(moves.length === 0) return null;
-    
-    moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
-    let bestScore = -Infinity;
-    
-    for(const m of moves){
-      const snap = snapshotState();
-      makeMoveOnBoard(m);
-      const score = minimax(depth-1, false, color, -Infinity, Infinity);
-      restoreState(snap);
-      if(score > bestScore){ 
-        bestScore = score; 
-        bestMove = m; 
-      }
-    }
-  }
-  
-  // Hide AI thinking indicator and show performance
-  const endTime = performance.now();
-  const timeTaken = (endTime - startTime).toFixed(2);
-  aiThinkingEl.style.display = 'none';
-  aiPerformanceEl.textContent = `Nodes: ${nodesSearched} | Time: ${timeTaken}ms`;
-  
-  setTimeout(() => {
-    aiPerformanceEl.style.display = 'none';
-  }, 3000);
-  
-  if(bestMove && bestMove.special === 'promotion' && !bestMove.promotionTo) bestMove.promotionTo = 'q';
-  return bestMove;
-}
-
-// Optimized minimax with timeout check
-function minimax(depth, maximizing, rootColor, alpha, beta){
-  // Check for timeout
-  if (searchTimeout && Date.now() - searchStartTime > aiTimeLimit) {
-    return 0; // Return neutral value on timeout
-  }
-  
-  nodesSearched++;
-  
-  // Simplified transposition table check
-  const boardKey = getBoardKey();
-  if (transpositionTable.has(boardKey)) {
-    const entry = transpositionTable.get(boardKey);
-    if (entry.depth >= depth) {
-      return entry.value;
-    }
-  }
-  
-  if(depth === 0) {
-    const score = evaluateBoard(rootColor);
-    // Store in transposition table with size limit
-    if (transpositionTable.size < TRANSPOSITION_TABLE_SIZE) {
-      transpositionTable.set(boardKey, { depth, value: score });
-    }
-    return score;
-  }
-  
-  const color = maximizing ? rootColor : (rootColor === 'w' ? 'b' : 'w');
-  const moves = generateAllLegalMovesForColor(color);
-  
-  if(moves.length === 0){
-    if(isKingInCheck(color)) return maximizing ? -999999 : 999999;
-    return 0;
-  }
-  
-  moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
-  
-  if(maximizing){
-    let value = -Infinity;
-    for(const m of moves){
-      const snap = snapshotState();
-      makeMoveOnBoard(m);
-      const v = minimax(depth-1, false, rootColor, alpha, beta);
-      restoreState(snap);
-      if(v > value) value = v;
-      if(v > alpha) alpha = v;
-      if(alpha >= beta) break; // Alpha-beta pruning
-    }
-    // Store in transposition table with size limit
-    if (transpositionTable.size < TRANSPOSITION_TABLE_SIZE) {
-      transpositionTable.set(boardKey, { depth, value });
-    }
-    return value;
-  } else {
-    let value = Infinity;
-    for(const m of moves){
-      const snap = snapshotState();
-      makeMoveOnBoard(m);
-      const v = minimax(depth-1, true, rootColor, alpha, beta);
-      restoreState(snap);
-      if(v < value) value = v;
-      if(v < beta) beta = v;
-      if(alpha >= beta) break; // Alpha-beta pruning
-    }
-    // Store in transposition table with size limit
-    if (transpositionTable.size < TRANSPOSITION_TABLE_SIZE) {
-      transpositionTable.set(boardKey, { depth, value });
-    }
-    return value;
-  }
-}
-
-// Optimized board key generation
-function getBoardKey() {
-  let key = '';
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      const p = board[r][c];
-      if (p) {
-        key += p.c + p.t;
-      } else {
-        key += '0';
-      }
-    }
-  }
-  return key + turn;
-}
-
-function maybeAIMove(){
-  if(!aiEnabled || pawnChoosePhase || forcingCharioteerPhase) return;
-  if(turn === aiColor){
-    setTimeout(()=>{
-      searchStartTime = Date.now();
-      const best = aiChooseMove(aiColor);
-      if(best) {
-        if(best.special === 'promotion' && !best.promotionTo) best.promotionTo = 'q';
-        applyMove(best);
-        setTimeout(()=> maybeAIMove(), 60);
-      }
-    }, 40);
-  }
-}
-
-/* ------------------------------
-   AI Pawn Placement & Charioteer
-   ------------------------------ */
-function aiAutoPlaceTwoPawns(color){
-  if(!pawnChoosePhase) return;
-  if(pawnChooseColor !== color) return;
-  const allowedRow = color === 'w' ? (BOARD_SIZE - 3) : 2;
-  const preferredFiles = [4,3,5,2,6,1,7,0,8];
-  let placed = 0;
-  for(let i=0;i<preferredFiles.length && placed<2;i++){
-    const c = preferredFiles[i];
-    if(board[allowedRow][c] === null){
-      board[allowedRow][c] = { t:'p', c: color, special:true };
-      if(color === 'w') specialPawnPositionsWhite.push([allowedRow,c]);
-      else specialPawnPositionsBlack.push([allowedRow,c]);
-      placed++;
-    }
-  }
-  pawnChooseCount += placed;
-  render();
-  if(pawnChooseCount < 2){
-    setTimeout(()=> aiAutoPlaceTwoPawns(color), 120);
-    return;
-  }
-  if(pawnChooseColor === 'w'){
-    pawnChooseColor = 'b'; pawnChooseCount = 0; render();
-    if(aiEnabled && pawnChooseColor === aiColor) setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 120);
-  } else {
-    pawnChoosePhase = false; pawnChooseColor = 'w'; pawnChooseCount = 0; turn = 'w';
-    render();
-    checkCharioteerNeeded();
-  }
-}
-function aiAutoPlaceCharioteer(color){
-  if(!forcingCharioteerPhase) return;
-  if(kingColorNeedingC !== color) return;
-  const king = findKing(color);
-  const cpos = findCharioteer(color);
-  if(!king || !cpos){ forcingCharioteerPhase=false; kingColorNeedingC=null; render(); return; }
-  const order = [ [0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1] ];
-  order.sort((a,b)=>{
-    const da = Math.abs((king[0]+a[0]) - cpos[0]) + Math.abs((king[1]+a[1]) - cpos[1]);
-    const db = Math.abs((king[0]+b[0]) - cpos[0]) + Math.abs((king[1]+b[1]) - cpos[1]);
-    return da - db;
+function openPromotionModal(color){
+  promoModal.querySelectorAll('.promoOpt').forEach(img=>{
+    const kind = img.dataset.piece;
+    img.src = `img/${color}${kind}.png`;
   });
-  for(const [dr,dc] of order){
-    const tr = king[0] + dr, tc = king[1] + dc;
-    if(inside(tr,tc) && board[tr][tc] === null){
-      board[tr][tc] = {...board[cpos[0]][cpos[1]]};
-      board[cpos[0]][cpos[1]] = null;
-      forcingCharioteerPhase = false; kingColorNeedingC = null;
-      render();
-      return;
-    }
-  }
-  setTimeout(()=> { checkCharioteerNeeded(); if(aiEnabled && aiColor === kingColorNeedingC) aiAutoPlaceCharioteer(aiColor); }, 250);
+  promoModal.style.display = 'flex';
 }
-
-/* ------------------------------
-   Check if charioteer must be moved
-   ------------------------------ */
-function checkCharioteerNeeded(){
-  const whiteK = findKing('w'), whiteC = findCharioteer('w');
-  const blackK = findKing('b'), blackC = findCharioteer('b');
-  if(whiteK && whiteC && !isAdjacent(whiteK, whiteC)){
-    forcingCharioteerPhase = true; kingColorNeedingC = 'w'; setStatusBar(); render();
-    if(aiEnabled && aiColor === 'w') setTimeout(()=> aiAutoPlaceCharioteer('w'), 100);
-    return;
-  }
-  if(blackK && blackC && !isAdjacent(blackK, blackC)){
-    forcingCharioteerPhase = true; kingColorNeedingC = 'b'; setStatusBar(); render();
-    if(aiEnabled && aiColor === 'b') setTimeout(()=> aiAutoPlaceCharioteer('b'), 100);
-    return;
-  }
-  forcingCharioteerPhase = false; kingColorNeedingC = null;
-}
-
-/* ------------------------------
-   UI & controls
-   ------------------------------ */
-document.getElementById('undoBtn').onclick = undoMove;
-document.getElementById('resetBtn').onclick = ()=>{ resetGame(); };
-document.getElementById('flipBtn').onclick = ()=>{ flipped = !flipped; render(); };
-document.getElementById('startBtn').onclick = ()=>{ startGame(); };
-
-const btnHvh = document.getElementById('btnHvh');
-const btnHvc = document.getElementById('btnHvc');
-const btnHvo = document.getElementById('btnHvo');
-function clearModeButtons(){ btnHvh.classList.remove('active'); btnHvc.classList.remove('active'); btnHvo.classList.remove('active'); }
-function setMode(mode){
-  currentMode = mode;
-  clearModeButtons();
-  if(mode === 'hvh'){ 
-    aiEnabled=false; 
-    onlineEnabled=false; 
-    btnHvh.classList.add('active'); 
-    modeStatusEl.textContent = 'Mode: Human vs Human'; 
-    aiLevelSelector.style.display = 'none';
-  }
-  if(mode === 'hvc'){ 
-    aiEnabled=true; 
-    onlineEnabled=false; 
-    btnHvc.classList.add('active'); 
-    modeStatusEl.textContent = 'Mode: Human vs Computer (AI)'; 
-    aiLevelSelector.style.display = 'flex';
-  }
-  if(mode === 'hvo'){ 
-    aiEnabled=false; 
-    onlineEnabled=true; 
-    btnHvo.classList.add('active'); 
-    modeStatusEl.textContent = 'Mode: Human vs Online Friend'; 
-    aiLevelSelector.style.display = 'none';
-  }
-  if(aiEnabled && pawnChoosePhase){
-    if(pawnChooseColor === aiColor) setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 120);
-  }
-}
-
-// AI level change handler
-aiLevelSelect.addEventListener('change', (e) => {
-  aiLevel = parseInt(e.target.value);
-  if (aiLevel === 5) {
-    // For Master level, use a time limit of 2 seconds (reduced from 3)
-    aiTimeLimit = 2000;
-  }
-});
-
-function startGame(){
-  resetGame();
-  if(currentMode === 'hvc'){ aiEnabled = true; if(pawnChoosePhase && pawnChooseColor === aiColor) setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 120); }
-  else { aiEnabled = false; }
-  if(currentMode === 'hvo'){ onlineEnabled = true; } else { onlineEnabled = false; }
-  const old = modeStatusEl.textContent;
-  modeStatusEl.textContent = 'Game started — ' + (currentMode==='hvc' ? 'AI enabled' : currentMode==='hvo' ? 'Online enabled' : 'PvP');
-  setTimeout(()=> modeStatusEl.textContent = old, 1400);
-  setTimeout(()=> maybeAIMove(), 220);
-}
-
-function openRules(){ document.getElementById('rulesModal').style.display = 'flex'; }
-function closeRules(){ document.getElementById('rulesModal').style.display = 'none'; }
-
-/* Promotion helpers */
-function updatePromoImagesForColor(color){
-  // color = 'w' or 'b' — update promo icons to match color for clarity
-  const imgs = promoModal.querySelectorAll('.promo-piece img');
-  imgs.forEach(img=>{
-    const kind = img.parentElement.dataset.piece;
-    img.src = 'img/' + (color === 'w' ? PIECE_IMG['w'][kind] : PIECE_IMG['b'][kind]);
-  });
-}
-
-/* Promotion handlers (FIXED: clear stale state) */
-promoModal.querySelectorAll('.promo-piece').forEach(el=>{
-  el.addEventListener('click', ()=>{
-    const kind = el.dataset.piece;
-    if(pendingPromotion){
-      pendingPromotion.promotionTo = kind;
-      applyMove(pendingPromotion);
-
-      // --- FIX: clear stale selection and pending promotion state so next clicks don't choke ---
-      pendingPromotion = null;
-      selected = null;
-      legalMovesCache = [];
-
-      promoModal.style.display = 'none';
-      render();
-      checkCharioteerNeeded();
-      setTimeout(()=> maybeAIMove(), 60);
-    }
-  });
-});
-promoModal.addEventListener('click', (e)=>{
-  if(e.target === promoModal){
-    // close modal and clear pending selection
-    promoModal.style.display = 'none';
+promoModal.addEventListener('click',(e)=>{
+  const opt = e.target.closest('.promoOpt');
+  if(!opt){ promoModal.style.display = 'none'; pendingPromotion = null; return; }
+  const pick = opt.dataset.piece;
+  if(pendingPromotion){
+    pendingPromotion.promotionTo = pick;
+    applyMoveAndSync(pendingPromotion);
     pendingPromotion = null;
-    selected = null;
-    legalMovesCache = [];
+    promoModal.style.display = 'none';
+    renderBoard();
   }
 });
 
-/* ------------------------------
-   Reset / start functions
-   ------------------------------ */
-function resetGame(){
-  board = initialBoard();
-  turn = 'w'; selected = null; legalMovesCache = []; moveHistory = []; lastMove = null;
-  enPassantTarget = null; halfmoveClock = 0; fullmoveNumber = 1;
-  specialPawnPositionsWhite = []; specialPawnPositionsBlack = [];
-  pawnChoosePhase = true; pawnChooseColor = 'w'; pawnChooseCount = 0;
-  forcingCharioteerPhase = false; kingColorNeedingC = null;
-  pendingPromotion = null;
-  transpositionTable.clear(); // Clear transposition table
-  nodesSearched = 0;
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
-    searchTimeout = null;
-  }
-  render();
-  if(aiEnabled && pawnChoosePhase && pawnChooseColor === aiColor) setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 120);
+/* AI */
+function aiMakeMove(){
+  if(currentMode !== 'hvc') return;
+  const color = aiColor;
+  if(color !== turn) return;
+  const moves = generateAllLegalMovesForColor(color);
+  if(!moves || moves.length === 0) return;
+  moves.sort((a,b)=>{
+    let sa = (a.captured?1:0) + (a.special==='promotion'?3:0);
+    let sb = (b.captured?1:0) + (b.special==='promotion'?3:0);
+    return sb - sa;
+  });
+  const pick = moves[0];
+  if(pick.special === 'promotion' && !pick.promotionTo) pick.promotionTo = 'q';
+  setTimeout(()=> applyMoveAndSync(pick), 120);
 }
 
-/* Online (stub) — keep separate */
-let socket = null;
-function createGame(){ alert('Create game (stub)'); }
-function joinGame(id){ alert('Join game ' + id + ' (stub)'); }
-
-/* ------------------------------
-   Init & start
-   ------------------------------ */
-board = initialBoard();
-render();
-setMode(currentMode);
-if(aiEnabled && pawnChoosePhase && pawnChooseColor === aiColor){
-  setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 150);
+/* ensure AI pawn placement */
+function ensureAIAutoPlacement(){
+  if(!pawnPlacePhase) return;
+  if(currentMode === 'hvc' && pawnPlaceColor === aiColor) setTimeout(()=> aiAutoPlaceTwo(aiColor), 120);
 }
 
-document.getElementById("infoBtn").onclick = () =>{
-  document.getElementById("infoModal").style.display = "flex";
-};
-document.getElementById("closeInfo").onclick = () =>{
-  document.getElementById("infoModal").style.display = "none";
-};
-document.getElementById("infoModal").onclick = (e) =>{
-  if(e.target.id === "infoModal"){
-    document.getElementById("infoModal").style.display = "none";
+/* parent sync placeholder */
+function postStateToParent(){
+  if(!roomId) return;
+  parent.postMessage({
+    type: 'sendMove',
+    roomId,
+    state: {
+      boardState, turn, enPassantTarget, halfmoveClock, fullmoveNumber, awaitingCharioteer,
+      pawnPlacePhase, pawnPlaceColor, placedW, placedB
+    }
+  }, '*');
+}
+
+/* receive sync */
+window.addEventListener('message', (ev)=>{
+  const msg = ev.data;
+  if(!msg?.type) return;
+  if(msg.type === 'setRoomId'){
+    roomId = msg.roomId;
+    roomBadge.style.display = 'inline-block';
+    roomBadge.textContent = 'Room: ' + roomId;
+    if(msg.playerColor){ localPlayerColor = msg.playerColor; roomBadge.textContent += ` (${localPlayerColor === 'w' ? 'White' : 'Black'})`; }
   }
+  if(msg.type === 'setPlayerColor'){
+    localPlayerColor = msg.playerColor;
+    if(roomBadge.style.display !== 'inline-block') roomBadge.style.display = 'inline-block';
+    roomBadge.textContent = `Room: ${roomId || '—'} (${localPlayerColor === 'w' ? 'White' : 'Black'})`;
+  }
+  if(msg.type === 'syncGame' && msg.state){
+    const s = msg.state;
+    if(s.boardState) boardState = s.boardState;
+    if(typeof s.turn !== 'undefined') turn = s.turn;
+    enPassantTarget = s.enPassantTarget || null;
+    awaitingCharioteer = s.awaitingCharioteer || false;
+    if(typeof s.pawnPlacePhase !== 'undefined') pawnPlacePhase = s.pawnPlacePhase;
+    if(typeof s.pawnPlaceColor !== 'undefined') pawnPlaceColor = s.pawnPlaceColor;
+    placedW = s.placedW || placedW;
+    placedB = s.placedB || placedB;
+    renderBoard();
+  }
+});
+
+/* UI controls */
+btnHvh.onclick = ()=> setMode('hvh');
+btnHvc.onclick = ()=> setMode('hvc');
+btnHvo.onclick = ()=> setMode('hvo');
+
+// FIX 1: Reset par bhi pawn placement compulsory
+resetBtn.onclick = ()=> { 
+  resetBoardState();
+  pawnPlacePhase = true;
+  pawnPlaceColor = 'w';
+  placedW = 0;
+  placedB = 0;
+  enPassantTarget = null;
+  moveHistory = [];
+  lastMove = null;
+  awaitingCharioteer = false;
+  turn = 'w';
+  renderBoard();
 };
+
+btnClearHistory.onclick = ()=> { moveHistory = []; movesLog.innerHTML = ''; };
+btnExport.onclick = ()=> { alert('Export not implemented in this rebuild — you can read boardState via window._G'); };
+
+function setMode(m){
+  currentMode = m;
+  btnHvh.classList.remove('active'); btnHvc.classList.remove('active'); btnHvo.classList.remove('active');
+  if(m === 'hvh') btnHvh.classList.add('active');
+  if(m === 'hvc'){ btnHvc.classList.add('active'); aiEnabled = true; }
+  if(m === 'hvo') btnHvo.classList.add('active');
+  ensureAIAutoPlacement();
+}
+
+/* init */
+renderBoard();
+setMode('hvo');
+
+window._G = { boardState, renderBoard, resetBoardState, startPawnPlacement, applyMoveAndSync, generateLegalMovesForSquare, aiMakeMove };
 
 </script>
+<script>
+  // Open popup
+  document.getElementById("infoBtn").onclick = function () {
+    document.getElementById("infoPopup").style.display = "block";
+  };
 
+  // Close popup
+  function closeInfo() {
+    document.getElementById("infoPopup").style.display = "none";
+  }
+</script>
+
+<div id="setupMsg">
+  <div class="box">
+    <span class="close"
+      onclick="document.getElementById('setupMsg').style.display='none'">✖</span>
+
+    <h3>Game Setup Required</h3>
+
+    <p>
+      Please <b>White Player</b> place <b>2 Pawns</b> on
+      <b>Row-3</b> any square and
+      <b>Black Player</b> place <b>2 Pawns</b> on
+      <b>Row-7</b> any square </b>
+
+<p> to this press button "Reset" and "Start Pawn Placement" 
+    </p>
+
+    <button
+      onclick="document.getElementById('setupMsg').style.display='none'">
+      OK
+    </button>
+  </div>
+</div>
 </body>
 </html>
+
