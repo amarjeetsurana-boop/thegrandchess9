@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>TheGrandChess9 • Smart AI (Optimized)</title>
+<title>TheGrandChess9 • Fast Powerful AI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <style>
 /* (CSS same as before) */
@@ -14,7 +14,7 @@
 .piece-item img { width: 55px; height: 55px; margin-bottom: 4px; }
 .piece-item span { font-size: 10px; font-weight: 400; font-weight: bold; }
 .piece-item:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.25); }
-:root{ --bg:#708c51; --panel:#f7f7f7; --border:#999; --shadow:rgba(0,0,0,0.25); --light:#f0d9b5; --dark:#63aab5; --accent:#2d9cdb; --accent-2:#2ecc71; }
+:root{ --bg:#d0e6b8; --panel:#f7f7f7; --border:#999; --shadow:rgba(0,0,0,0.25); --light:#f0d9b5; --dark:#b58863; --accent:#2d9cdb; --accent-2:#2ecc71; }
 *{box-sizing:border-box}
 body{ margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;font-size:15px; background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start; min-height:100vh;padding:12px; }
 .header{ text-align:center;font-size:1.5rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
@@ -57,6 +57,42 @@ img.piece{width:66px;height:66px;user-select:none;pointer-events:none;}
 .promo-piece{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;}
 .promo-piece img{width:54px;height:54px;}
 .rule-modal .rules-content{max-height:70vh;overflow:auto;padding:12px;background:#fff;border-radius:8px;}
+.ai-thinking { 
+  position: absolute; 
+  top: 10px; 
+  right: 10px; 
+  background: rgba(255,255,255,0.9); 
+  padding: 8px 12px; 
+  border-radius: 6px; 
+  font-weight: bold; 
+  display: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.ai-level-selector {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ai-level-selector label {
+  font-weight: bold;
+}
+.ai-level-selector select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #999;
+}
+.ai-performance {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  background: rgba(255,255,255,0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
 @media (max-width:860px){ .left-board{grid-template-columns:34px 540px;grid-template-rows:540px 34px;} .rank-label{height:60px;font-size:18px;} .chessboard{
   display:grid;
   grid-template-columns:repeat(9,88px);
@@ -243,6 +279,18 @@ img.piece{width:66px;height:66px;user-select:none;pointer-events:none;}
     <button id="btnHvo" onclick="setMode('hvo')">Human vs Online Friend</button>
   </div>
 
+  <!-- AI Level Selector -->
+  <div class="ai-level-selector" id="aiLevelSelector" style="display: none;">
+    <label for="aiLevel">AI Level:</label>
+    <select id="aiLevel">
+      <option value="1">Easy (Depth 2)</option>
+      <option value="2">Medium (Depth 3)</option>
+      <option value="3" selected>Hard (Depth 4)</option>
+      <option value="4">Expert (Depth 5)</option>
+      <option value="5">Master (Time-based)</option>
+    </select>
+  </div>
+
   <!-- Controls -->
   <div class="controls">
     <button id="undoBtn">Undo</button>
@@ -253,6 +301,8 @@ img.piece{width:66px;height:66px;user-select:none;pointer-events:none;}
 
   <!-- Board -->
   <div class="board-container" id="boardContainer">
+    <div class="ai-thinking" id="aiThinking">AI is thinking...</div>
+    <div class="ai-performance" id="aiPerformance"></div>
     <div class="left-board">
       <div class="rank-labels" aria-hidden="true">
         <div class="rank-label">9</div><div class="rank-label">8</div><div class="rank-label">7</div>
@@ -322,6 +372,10 @@ const infoTurn = document.getElementById('infoTurn');
 const infoHalfmove = document.getElementById('infoHalfmove');
 const infoPawnPlace = document.getElementById('infoPawnPlace');
 const modeStatusEl = document.getElementById('modeStatus');
+const aiThinkingEl = document.getElementById('aiThinking');
+const aiPerformanceEl = document.getElementById('aiPerformance');
+const aiLevelSelector = document.getElementById('aiLevelSelector');
+const aiLevelSelect = document.getElementById('aiLevel');
 
 const PIECE_IMG = {
   w: { p:'wp.png', r:'wr.png', n:'wn.png', b:'wb.png', q:'wq.png', k:'wk.png', s:'ws.png', c:'wc.png' },
@@ -354,6 +408,112 @@ let aiEnabled = false;
 let onlineEnabled = false;
 let aiColor = 'b';
 let currentMode = 'hvh'; // 'hvh' | 'hvc' | 'hvo'
+let aiLevel = 3; // Default to Hard level
+let aiTimeLimit = 2000; // 2 seconds for time-based search (reduced from 3)
+
+// Optimized transposition table with size limit
+const TRANSPOSITION_TABLE_SIZE = 10000;
+const transpositionTable = new Map();
+let nodesSearched = 0;
+let searchStartTime = 0;
+let searchTimeout = null;
+
+// Simplified piece-square tables for better performance
+const PAWN_TABLE = [
+  [0,  0,  0,  0,  0,  0,  0,  0,  0],
+  [50, 50, 50, 50, 50, 50, 50, 50, 50],
+  [10, 10, 20, 30, 30, 30, 20, 10, 10],
+  [5,  5, 10, 25, 25, 25, 10,  5,  5],
+  [0,  0,  0, 20, 20, 20,  0,  0,  0],
+  [5, -5,-10,  0,  0,  0,-10, -5,  5],
+  [5, 10, 10,-20,-20,-20, 10, 10,  5],
+  [0,  0,  0,  0,  0,  0,  0,  0,  0],
+  [0,  0,  0,  0,  0,  0,  0,  0,  0]
+];
+
+const KNIGHT_TABLE = [
+  [-50,-40,-30,-30,-30,-30,-30,-40,-50],
+  [-40,-20,  0,  0,  0,  0,  0,-20,-40],
+  [-30,  0, 10, 15, 15, 15, 10,  0,-30],
+  [-30,  5, 15, 20, 20, 20, 15,  5,-30],
+  [-30,  0, 15, 20, 20, 20, 15,  0,-30],
+  [-30,  5, 10, 15, 15, 15, 10,  5,-30],
+  [-30,  0,  5, 10, 10, 10,  5,  0,-30],
+  [-30,-10,  0,  0,  0,  0,  0,-10,-30],
+  [-50,-40,-30,-30,-30,-30,-30,-40,-50]
+];
+
+const BISHOP_TABLE = [
+  [-20,-10,-10,-10,-10,-10,-10,-10,-20],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-10,  0,  5, 10, 10, 10,  5,  0,-10],
+  [-10,  5,  5, 10, 10, 10,  5,  5,-10],
+  [-10,  0, 10, 10, 10, 10, 10,  0,-10],
+  [-10, 10, 10, 10, 10, 10, 10, 10,-10],
+  [-10,  5,  0,  0,  0,  0,  0,  5,-10],
+  [-10,  0,  5,  0,  0,  0,  5,  0,-10],
+  [-20,-10,-10,-10,-10,-10,-10,-10,-20]
+];
+
+const ROOK_TABLE = [
+  [0,  0,  0,  0,  0,  0,  0,  0,  0],
+  [5, 10, 10, 10, 10, 10, 10, 10,  5],
+  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
+  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
+  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
+  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
+  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
+  [-5,  0,  0,  0,  0,  0,  0,  0, -5],
+  [0,  0,  0,  5,  5,  5,  0,  0,  0]
+];
+
+const QUEEN_TABLE = [
+  [-20,-10,-10, -5, -5, -5,-10,-10,-20],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
+  [-5,  0,  5,  5,  5,  5,  5,  0, -5],
+  [0,  0,  5,  5,  5,  5,  5,  0, -5],
+  [-10,  5,  5,  5,  5,  5,  5,  0,-10],
+  [-10,  0,  5,  0,  0,  0,  0,  0,-10],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-20,-10,-10, -5, -5, -5,-10,-10,-20]
+];
+
+const KING_TABLE = [
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-50,-40,-40,-30]
+];
+
+const CHARIOTEER_TABLE = [
+  [-20,-10,-10, -5,  0, -5,-10,-10,-20],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
+  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
+  [0,  0,  5, 10, 20, 10,  5,  0,  0],
+  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
+  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-20,-10,-10, -5,  0, -5,-10,-10,-20]
+];
+
+const SCEPTRE_TABLE = [
+  [-20,-10,-10, -5, -5, -5,-10,-10,-20],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
+  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
+  [0,  0,  5, 10, 10, 10,  5,  0,  0],
+  [-5,  0,  5, 10, 10, 10,  5,  0, -5],
+  [-10,  0,  5,  5,  5,  5,  5,  0,-10],
+  [-10,  0,  0,  0,  0,  0,  0,  0,-10],
+  [-20,-10,-10, -5, -5, -5,-10,-10,-20]
+];
 
 const PIECE_VALUES={p:100,n:300,b:250,r:500,q:1000,k:20000,c:350,s:1800};
 
@@ -839,59 +999,256 @@ function renderMoves(){
 }
 
 /* ------------------------------
-   AI (alpha-beta + move ordering + adaptive depth)
+   OPTIMIZED POWERFUL AI
    ------------------------------ */
 function moveOrderScore(m){
   let score = 0;
   if(m.captured) score += (PIECE_VALUES[m.captured.t] || 0) * 10;
   if(m.special === 'promotion') score += 1000;
+  
+  // Center control bonus
   const toC = m.to[1], centerBonus = 4 - Math.abs(4 - toC);
-  score += centerBonus;
+  score += centerBonus * 5;
+  
+  // Check if move gives check (simplified check)
+  const snap = snapshotState();
+  makeMoveOnBoard(m);
+  if(isKingInCheck(turn === 'w' ? 'b' : 'w')) score += 50;
+  restoreState(snap);
+  
   return score;
 }
+
+// Optimized evaluation function for better performance
 function evaluateBoard(forColor){
   let score = 0;
+  let whiteMaterial = 0, blackMaterial = 0;
+  let whiteKingSafety = 0, blackKingSafety = 0;
+  let whiteCenterControl = 0, blackCenterControl = 0;
+  
+  // Material and simplified positional evaluation
   for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++){
     const p = board[r][c];
     if(!p) continue;
+    
     const val = PIECE_VALUES[p.t] || 0;
-    score += (p.c === forColor ? val : -val);
+    const isWhite = p.c === 'w';
+    
+    // Add material value
+    if(isWhite) {
+      whiteMaterial += val;
+    } else {
+      blackMaterial += val;
+    }
+    
+    // Simplified positional value
+    let positionalValue = 0;
+    const tableRow = isWhite ? r : BOARD_SIZE-1-r; // Flip table for black
+    
+    switch(p.t) {
+      case 'p':
+        positionalValue = PAWN_TABLE[tableRow][c];
+        break;
+      case 'n':
+        positionalValue = KNIGHT_TABLE[tableRow][c];
+        break;
+      case 'b':
+        positionalValue = BISHOP_TABLE[tableRow][c];
+        break;
+      case 'r':
+        positionalValue = ROOK_TABLE[tableRow][c];
+        break;
+      case 'q':
+        positionalValue = QUEEN_TABLE[tableRow][c];
+        break;
+      case 'k':
+        positionalValue = KING_TABLE[tableRow][c];
+        // Simplified king safety
+        if(isWhite) whiteKingSafety += 10;
+        else blackKingSafety += 10;
+        break;
+      case 'c':
+        positionalValue = CHARIOTEER_TABLE[tableRow][c];
+        // Charioteer is more valuable when protecting king
+        const kingPosC = findKing(p.c);
+        if(kingPosC && isAdjacent([r,c], kingPosC)) {
+          if(isWhite) whiteKingSafety += 20;
+          else blackKingSafety += 20;
+        }
+        break;
+      case 's':
+        positionalValue = SCEPTRE_TABLE[tableRow][c];
+        break;
+    }
+    
+    // Center control
+    if((r >= 3 && r <= 5) && (c >= 3 && c <= 5)) {
+      if(isWhite) whiteCenterControl += 5;
+      else blackCenterControl += 5;
+    }
+    
+    // Add positional value to score
+    score += isWhite ? positionalValue : -positionalValue;
   }
-  return score;
+  
+  // Combine evaluation factors
+  const materialDiff = whiteMaterial - blackMaterial;
+  const kingSafetyDiff = whiteKingSafety - blackKingSafety;
+  const centerControlDiff = whiteCenterControl - blackCenterControl;
+  
+  // Weighted combination of factors
+  score = materialDiff + 
+          kingSafetyDiff * 2 + 
+          centerControlDiff * 2;
+  
+  // Return score from perspective of the requested color
+  return forColor === 'w' ? score : -score;
 }
+
+// Choose AI depth based on level (optimized)
 function chooseAIDepth(){
-  let totalMoves = 0;
-  for(const col of ['w','b']) totalMoves += generateAllLegalMovesForColor(col).length;
-  let pieceCount = 0;
-  for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(board[r][c]) pieceCount++;
-  if(totalMoves > 90 || pieceCount > 24) return 2;
-  return 3;
-}
-function aiChooseMove(color){
-  const depth = chooseAIDepth();
-  const moves = generateAllLegalMovesForColor(color);
-  if(moves.length === 0) return null;
-  moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
-  let bestMove = null, bestScore = -Infinity;
-  for(const m of moves){
-    const snap = snapshotState();
-    makeMoveOnBoard(m);
-    const score = minimax(depth-1, false, color, -Infinity, Infinity);
-    restoreState(snap);
-    if(score > bestScore){ bestScore = score; bestMove = m; }
+  switch(aiLevel) {
+    case 1: return 2; // Easy
+    case 2: return 3; // Medium
+    case 3: return 4; // Hard
+    case 4: return 5; // Expert
+    case 5: return 6; // Master (will be time-limited)
+    default: return 4;
   }
+}
+
+// Optimized time-based search with timeout
+function timeBasedSearch(color, timeLimit) {
+  const startTime = Date.now();
+  let bestMove = null;
+  let depth = 1;
+  
+  // Set timeout to prevent hanging
+  searchTimeout = setTimeout(() => {
+    console.log('AI search timeout reached');
+  }, timeLimit);
+  
+  // Iterative deepening with time limit
+  while (Date.now() - startTime < timeLimit && depth <= 6) {
+    const moves = generateAllLegalMovesForColor(color);
+    if (moves.length === 0) {
+      clearTimeout(searchTimeout);
+      return null;
+    }
+    
+    moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
+    let currentBestMove = null;
+    let currentBestScore = -Infinity;
+    
+    for (const m of moves) {
+      if (Date.now() - startTime >= timeLimit) break;
+      
+      const snap = snapshotState();
+      makeMoveOnBoard(m);
+      const score = minimax(depth-1, false, color, -Infinity, Infinity);
+      restoreState(snap);
+      
+      if (score > currentBestScore) {
+        currentBestScore = score;
+        currentBestMove = m;
+      }
+    }
+    
+    if (currentBestMove) {
+      bestMove = currentBestMove;
+    }
+    
+    depth++;
+  }
+  
+  clearTimeout(searchTimeout);
+  return bestMove;
+}
+
+// Enhanced AI move selection with performance monitoring
+function aiChooseMove(color){
+  let bestMove = null;
+  
+  // Show AI thinking indicator
+  aiThinkingEl.style.display = 'block';
+  aiPerformanceEl.style.display = 'block';
+  
+  const startTime = performance.now();
+  nodesSearched = 0;
+  
+  if (aiLevel === 5) { // Master level - time-based search
+    bestMove = timeBasedSearch(color, aiTimeLimit);
+  } else { // Other levels - depth-based search
+    const depth = chooseAIDepth();
+    const moves = generateAllLegalMovesForColor(color);
+    if(moves.length === 0) return null;
+    
+    moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
+    let bestScore = -Infinity;
+    
+    for(const m of moves){
+      const snap = snapshotState();
+      makeMoveOnBoard(m);
+      const score = minimax(depth-1, false, color, -Infinity, Infinity);
+      restoreState(snap);
+      if(score > bestScore){ 
+        bestScore = score; 
+        bestMove = m; 
+      }
+    }
+  }
+  
+  // Hide AI thinking indicator and show performance
+  const endTime = performance.now();
+  const timeTaken = (endTime - startTime).toFixed(2);
+  aiThinkingEl.style.display = 'none';
+  aiPerformanceEl.textContent = `Nodes: ${nodesSearched} | Time: ${timeTaken}ms`;
+  
+  setTimeout(() => {
+    aiPerformanceEl.style.display = 'none';
+  }, 3000);
+  
   if(bestMove && bestMove.special === 'promotion' && !bestMove.promotionTo) bestMove.promotionTo = 'q';
   return bestMove;
 }
+
+// Optimized minimax with timeout check
 function minimax(depth, maximizing, rootColor, alpha, beta){
-  if(depth === 0) return evaluateBoard(rootColor);
+  // Check for timeout
+  if (searchTimeout && Date.now() - searchStartTime > aiTimeLimit) {
+    return 0; // Return neutral value on timeout
+  }
+  
+  nodesSearched++;
+  
+  // Simplified transposition table check
+  const boardKey = getBoardKey();
+  if (transpositionTable.has(boardKey)) {
+    const entry = transpositionTable.get(boardKey);
+    if (entry.depth >= depth) {
+      return entry.value;
+    }
+  }
+  
+  if(depth === 0) {
+    const score = evaluateBoard(rootColor);
+    // Store in transposition table with size limit
+    if (transpositionTable.size < TRANSPOSITION_TABLE_SIZE) {
+      transpositionTable.set(boardKey, { depth, value: score });
+    }
+    return score;
+  }
+  
   const color = maximizing ? rootColor : (rootColor === 'w' ? 'b' : 'w');
   const moves = generateAllLegalMovesForColor(color);
+  
   if(moves.length === 0){
     if(isKingInCheck(color)) return maximizing ? -999999 : 999999;
     return 0;
   }
+  
   moves.sort((a,b)=> moveOrderScore(b) - moveOrderScore(a));
+  
   if(maximizing){
     let value = -Infinity;
     for(const m of moves){
@@ -901,7 +1258,11 @@ function minimax(depth, maximizing, rootColor, alpha, beta){
       restoreState(snap);
       if(v > value) value = v;
       if(v > alpha) alpha = v;
-      if(alpha >= beta) break;
+      if(alpha >= beta) break; // Alpha-beta pruning
+    }
+    // Store in transposition table with size limit
+    if (transpositionTable.size < TRANSPOSITION_TABLE_SIZE) {
+      transpositionTable.set(boardKey, { depth, value });
     }
     return value;
   } else {
@@ -913,15 +1274,37 @@ function minimax(depth, maximizing, rootColor, alpha, beta){
       restoreState(snap);
       if(v < value) value = v;
       if(v < beta) beta = v;
-      if(alpha >= beta) break;
+      if(alpha >= beta) break; // Alpha-beta pruning
+    }
+    // Store in transposition table with size limit
+    if (transpositionTable.size < TRANSPOSITION_TABLE_SIZE) {
+      transpositionTable.set(boardKey, { depth, value });
     }
     return value;
   }
 }
+
+// Optimized board key generation
+function getBoardKey() {
+  let key = '';
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const p = board[r][c];
+      if (p) {
+        key += p.c + p.t;
+      } else {
+        key += '0';
+      }
+    }
+  }
+  return key + turn;
+}
+
 function maybeAIMove(){
   if(!aiEnabled || pawnChoosePhase || forcingCharioteerPhase) return;
   if(turn === aiColor){
     setTimeout(()=>{
+      searchStartTime = Date.now();
       const best = aiChooseMove(aiColor);
       if(best) {
         if(best.special === 'promotion' && !best.promotionTo) best.promotionTo = 'q';
@@ -1024,13 +1407,40 @@ function clearModeButtons(){ btnHvh.classList.remove('active'); btnHvc.classList
 function setMode(mode){
   currentMode = mode;
   clearModeButtons();
-  if(mode === 'hvh'){ aiEnabled=false; onlineEnabled=false; btnHvh.classList.add('active'); modeStatusEl.textContent = 'Mode: Human vs Human'; }
-  if(mode === 'hvc'){ aiEnabled=true; onlineEnabled=false; btnHvc.classList.add('active'); modeStatusEl.textContent = 'Mode: Human vs Computer (AI)'; }
-  if(mode === 'hvo'){ aiEnabled=false; onlineEnabled=true; btnHvo.classList.add('active'); modeStatusEl.textContent = 'Mode: Human vs Online Friend'; }
+  if(mode === 'hvh'){ 
+    aiEnabled=false; 
+    onlineEnabled=false; 
+    btnHvh.classList.add('active'); 
+    modeStatusEl.textContent = 'Mode: Human vs Human'; 
+    aiLevelSelector.style.display = 'none';
+  }
+  if(mode === 'hvc'){ 
+    aiEnabled=true; 
+    onlineEnabled=false; 
+    btnHvc.classList.add('active'); 
+    modeStatusEl.textContent = 'Mode: Human vs Computer (AI)'; 
+    aiLevelSelector.style.display = 'flex';
+  }
+  if(mode === 'hvo'){ 
+    aiEnabled=false; 
+    onlineEnabled=true; 
+    btnHvo.classList.add('active'); 
+    modeStatusEl.textContent = 'Mode: Human vs Online Friend'; 
+    aiLevelSelector.style.display = 'none';
+  }
   if(aiEnabled && pawnChoosePhase){
     if(pawnChooseColor === aiColor) setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 120);
   }
 }
+
+// AI level change handler
+aiLevelSelect.addEventListener('change', (e) => {
+  aiLevel = parseInt(e.target.value);
+  if (aiLevel === 5) {
+    // For Master level, use a time limit of 2 seconds (reduced from 3)
+    aiTimeLimit = 2000;
+  }
+});
 
 function startGame(){
   resetGame();
@@ -1097,6 +1507,12 @@ function resetGame(){
   pawnChoosePhase = true; pawnChooseColor = 'w'; pawnChooseCount = 0;
   forcingCharioteerPhase = false; kingColorNeedingC = null;
   pendingPromotion = null;
+  transpositionTable.clear(); // Clear transposition table
+  nodesSearched = 0;
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
   render();
   if(aiEnabled && pawnChoosePhase && pawnChooseColor === aiColor) setTimeout(()=> aiAutoPlaceTwoPawns(aiColor), 120);
 }
