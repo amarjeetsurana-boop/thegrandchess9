@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <title>TheGrandChess9 • Fixed & Smooth</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<script src="/socket.io/socket.io.js"></script>
 <style>
 /* ================= ROOT ================= */
 :root{
@@ -12,13 +11,10 @@
   --panel:#f7f7f7;
   --border:#999;
   --shadow:rgba(0,0,0,0.25);
-  --light:#f5edd7;
-  --dark:#dbac76;
   --accent:#2d9cdb;
   --accent-2:#2ecc71;
 
-  --sq:78px;
-  --gap:3px;
+  --gap:3px; /* Gap variable rakh liya hai */
 }
 
 *{
@@ -36,6 +32,7 @@ body{
   flex-direction:column;
   align-items:center;
   padding:12px;
+  /* overflow hata diya taaki agar jyada ho to dikhaye */
 }
 
 /* ================= HEADER ================= */
@@ -92,24 +89,26 @@ button.active{
   box-shadow:0 3px 8px var(--shadow);
   max-width:820px;
   width:100%;
-  overflow:auto;
+  /* height remove kar diya taaki content fit ho */
 }
 
 /* ================= BOARD GRID ================= */
 .left-board{
   display:grid;
-  grid-template-columns:44px auto;
-  grid-template-rows:auto 44px;
+  grid-template-columns: 44px 1fr; /* Labels aur Board (Flex) */
+  grid-template-rows: auto 44px; /* Height Board pe depend karegi */
   gap:6px;
+  width: 100%;
 }
 
 /* ================= RANK LABELS ================= */
 .rank-labels{
   display:flex;
   flex-direction:column;
+  height: 100%; /* ⭐ Board ke barabar height lega */
 }
 .rank-label{
-  height:var(--sq);
+  flex: 1; /* ⭐ Apne aap space distribute karega (Jumping rokne ke liye) */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -121,10 +120,10 @@ button.active{
 /* ================= FILE LABELS ================= */
 .file-labels{
   display:flex;
-  width:calc(9 * var(--sq) + 8 * var(--gap));
+  width: 100%; /* ⭐ Board ke barabar width lega */
 }
 .file-label{
-  width:var(--sq);
+  flex: 1; /* ⭐ Apne aap space distribute karega */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -136,78 +135,73 @@ button.active{
 /* ================= CHESSBOARD ================= */
 .board-wrap{
   display:flex;
+  width: 100%;
 }
 
 .chessboard{
   display:grid;
-  grid-template-columns:repeat(9, var(--sq));
-  grid-template-rows:repeat(9, var(--sq));
+  /* ⭐ Responsive Grid: Pixels hata kar fractions use kiye */
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
   gap:var(--gap);
   border-radius:8px;
   overflow:hidden;
+
+  /* ⭐ MAIN FIX: Square Shape Force Karna */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1; /* Board hamesha square rahega */
 }
 
 /* ================= SQUARES ================= */
 .square{
-  width:var(--sq);
-  height:var(--sq);
+  width:100%;
+  height:100%;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
 
-  /* 🔥 STRONG 3D EFFECT */
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.75),
-    inset 0 -4px 0 rgba(0,0,0,.25),
-    0 4px 8px rgba(0,0,0,.35);
-
+  /* Gold/Silver Colors (Peeche request kiya tha, ye raha fix) */
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.75), inset 0 -4px 0 rgba(0,0,0,.25);
   transition:transform .1s ease, box-shadow .1s ease;
 }
 
 .square:active{
   transform:translateY(1px);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.4),
-    inset 0 -1px 0 rgba(0,0,0,.25),
-    0 1px 2px rgba(0,0,0,.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.25);
 }
 
+/* Gold Color */
 .square.light{
-  background:linear-gradient(145deg,#f8f1e4,#e2d3b5);
+  background: #FFD700;
+  /* Thoda gradient for 3D look */
+  background: linear-gradient(145deg, #ffec8b, #d4af37);
 }
 
+/* Silver Color */
 .square.dark{
-  background:linear-gradient(145deg,#c79a63,#9f6b3c);
+  background: #C0C0C0;
+  /* Thoda gradient for 3D look */
+  background: linear-gradient(145deg, #e6e6e6, #a9a9a9);
 }
-
-.square{
-  box-shadow:
-    inset 2px 2px 4px rgba(255,255,255,0.4),
-    inset -2px -2px 4px rgba(0,0,0,0.25);
-}
-
 
 /* ================= STATES ================= */
 .square.selected{
   outline:3px solid #3498db;
   z-index:2;
 }
-
 .square.highlight{
   outline:3px solid #2ecc71;
 }
-
 .square.last-move{
-  box-shadow:
-    inset 0 0 0 3px rgba(0,0,0,.25),
-    0 2px 4px rgba(0,0,0,.25);
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.25);
 }
 
 /* ================= PIECES ================= */
 img.piece{
-  width:66px;
-  height:66px;
+  width: 90%; /* Square ke relative size */
+  height: 90%;
   user-select:none;
   pointer-events:none;
 }
@@ -286,21 +280,13 @@ img.piece{
 }
 
 /* ================= RESPONSIVE ================= */
-@media (max-width:860px){
-  :root{ --sq:60px; }
-
-  .left-board{
-    grid-template-columns:30px auto;
-    grid-template-rows:auto 30px;
+@media (max-width: 860px){
+  .left-board {
+    grid-template-columns: 30px 1fr;
+    grid-template-rows: auto 30px;
   }
-
   .rank-label,.file-label{
     font-size:16px;
-  }
-
-  img.piece{
-    width:48px;
-    height:48px;
   }
 }
 </style>
