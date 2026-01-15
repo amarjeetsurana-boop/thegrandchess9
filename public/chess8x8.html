@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <title>♔ PERFECT CHESS 8x8 - Multiplayer</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1" />
 <script src="/socket.io/socket.io.js"></script>
 <style>
   :root{
@@ -25,20 +25,21 @@ body{
   display:flex;
   min-height:100vh;
   justify-content:center;
-  align-items:center;
-  padding:20px;
+  align-items:center; /* Center vertically if height permits */
+  padding:10px; /* Reduced padding for small screens */
   box-sizing:border-box;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* ===== APP LAYOUT ===== */
 .app{
-  width:980px;
-  max-width:98vw;
+  width:100%; /* FIX: Full width instead of 980px fixed */
+  max-width:100%;
 
   display:flex;
-  gap:20px;
+  gap:15px;
 
-  align-items:stretch;
+  align-items:flex-start; /* Align to top */
   justify-content:center;
   flex-wrap:wrap;
 }
@@ -47,7 +48,9 @@ body{
 .board-wrap{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:10px;
+  width: 100%;
+  max-width: 600px; /* Limit max board size on desktop */
 }
 
 /* ===== CHESSBOARD ===== */
@@ -56,11 +59,11 @@ body{
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
 
-  width:560px;
+  width: 100%; /* FIX: Fully responsive */
   aspect-ratio:1/1;
-  max-width:100%;
+  max-width: 100%;
 
-  gap:4px;
+  gap:2px; /* Reduced gap for cleaner look on small screens */
   padding:4px;
 
   background:#222;
@@ -68,7 +71,7 @@ body{
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 
   user-select:none;
-  margin:auto;
+  margin:0 auto;
 }
 
 /* ===== SQUARE ===== */
@@ -77,18 +80,20 @@ body{
   align-items:center;
   justify-content:center;
 
-  font-size:38px;
+  /* FIX: Responsive font size for pieces */
+  font-size: min(8vw, 45px); 
   cursor:pointer;
-  border-radius:6px;
+  border-radius:4px;
 
-  transition:0.2s;
+  transition:0.1s;
 }
 .square.light{ background:var(--light); }
 .square.dark{ background:var(--dark); }
 
 /* ===== STATES ===== */
 .square.highlight{
-  outline:3px solid var(--legal);
+  outline:2px solid var(--legal);
+  background-color: rgba(0, 255, 136, 0.2);
 }
 .square.last-move{
   box-shadow: inset 0 0 0 4px rgba(241,196,15,0.6);
@@ -99,12 +104,12 @@ body{
   z-index:2;
 }
 .square.check{
-  background:rgba(255,68,68,0.45);
-  animation:pulse 0.8s infinite;
+  background:rgba(255,68,68,0.6);
+  animation:pulse 1s infinite;
 }
 
 @keyframes pulse{
-  0%,100%{ box-shadow: inset 0 0 0 5px var(--check); }
+  0%,100%{ box-shadow: inset 0 0 0 4px var(--check); }
   50%{ box-shadow: inset 0 0 0 8px var(--check); }
 }
 
@@ -112,12 +117,13 @@ body{
 .right-panel{
   flex:1;
   min-width:280px;
+  max-width: 100%;
 
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:10px;
 
-  padding:16px;
+  padding:12px;
   border-radius:12px;
 
   background:rgba(255,255,255,0.1);
@@ -128,37 +134,46 @@ body{
 /* ===== TOP SECTIONS ===== */
 .room-section{
   background: linear-gradient(45deg, #00d4aa, #00b894);
-  padding:18px;
+  padding:12px;
   border-radius:12px;
+  text-align: center;
+}
+.room-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
 }
 
 .status{
-  padding:14px;
-  border-radius:10px;
+  padding:10px;
+  border-radius:8px;
   background:rgba(255,255,255,0.2);
   text-align:center;
   font-weight:600;
+  font-size: 14px;
 }
 
 /* ===== PLAYER INFO ===== */
 .player-info{
   display:flex;
-  justify-content:space-around;
-  padding:14px;
-  border-radius:10px;
+  justify-content:space-between; /* space-between better for small width */
+  padding:10px;
+  border-radius:8px;
   background:rgba(255,255,255,0.2);
   font-weight:600;
+  font-size: 13px;
 }
 
 /* ===== MOVES (SCROLL AREA) ===== */
 .moves{
   flex:1;
-  min-height:160px;
+  min-height:100px; /* Reduced min height for mobile */
+  max-height: 200px;
 
   overflow:auto;
-  padding:12px;
-  border-radius:10px;
+  padding:8px;
+  border-radius:8px;
   background:rgba(255,255,255,0.1);
+  font-size: 13px;
 }
 .moves ol{
   margin:0;
@@ -167,121 +182,104 @@ body{
   color:#ddd;
 }
 
-/* ===== CONTROLS (ALWAYS BOTTOM) ===== */
-.controls{
-  margin-top:auto;     /* 🔥 KEY FIX */
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:center;
-}
-
-/* ===== BUTTONS ===== */
-button{
-  padding:12px 20px;
-  border-radius:8px;
-  border:0;
-  cursor:pointer;
-  font-weight:600;
-  color:white;
-
-  background:linear-gradient(45deg, #e94560, #c44569);
-  transition:0.2s;
-}
-button:hover{
-  transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(233,69,96,0.4);
-}
-button.secondary{ background:#7f8c8d; }
-
 /* ===== INPUT ===== */
 input{
-  padding:12px 16px;
-  border-radius:8px;
+  width: 100%;
+  padding:10px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  border-radius:6px;
   border:1px solid rgba(255,255,255,0.3);
   background:rgba(255,255,255,0.1);
   color:white;
 }
 
+/* ===== BUTTONS ===== */
+button{
+  padding:8px 12px;
+  border-radius:6px;
+  border:0;
+  cursor:pointer;
+  font-weight:600;
+  color:white;
+  font-size: 13px;
+
+  background:linear-gradient(45deg, #e94560, #c44569);
+  transition:0.2s;
+}
+button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 8px rgba(233,69,96,0.4);
+}
+button.secondary{ background:#7f8c8d; }
+
 /* ===== FOOTER ===== */
 .footer{
   text-align:center;
-  font-size:14px;
+  font-size:12px;
   color:#ccc;
+  margin-top: auto;
 }
 
 /* ===== PROMOTION MODAL ===== */
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.6);
+  background:rgba(0,0,0,0.7);
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:100;
 }
 .modal-card{
-  padding:24px;
-  border-radius:16px;
+  padding:20px;
+  border-radius:12px;
   display:flex;
-  gap:16px;
-  background:linear-gradient(45deg,#333,#444);
+  gap:15px;
+  background:#2d3436;
   border:2px solid gold;
 }
+.promo-piece {
+  font-size: 40px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+}
+.promo-piece:hover { background: rgba(255,255,255,0.2); }
 
-/* ===== MOBILE ===== */
-@media (max-width:900px){
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 800px){
   .app{
-    flex-direction:column;
-    align-items:center;
+    flex-direction:column; /* Stack vertically on smaller screens */
+    align-items: center;
   }
   .right-panel{
-    width:100%;
-    max-width:560px;
+    width: 100%;
+    max-width: 600px; /* Match board width */
+    order: 2; /* Ensure it stays below */
+  }
+  .board-wrap {
+    width: 100%;
+    order: 1;
   }
 }
-
 
 /* Controls inside Multiplayer Room */
 .room-section .controls {
   display: flex;
-  gap: 8px;                /* buttons ke beech gap */
-  justify-content: flex-start; /* left aligned, ya center karne ke liye 'center' */
-  flex-wrap: wrap;          /* responsive: chhote screen par wrap ho jaye */
+  gap: 6px;                
+  justify-content: center; 
+  flex-wrap: wrap;          
   margin-top: 10px;
 }
 
 .room-section .controls button {
-  padding: 8px 14px;       /* chhota size */
-  font-size: 14px;         /* readable but compact */
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 6px 10px;       /* Compact */
+  font-size: 12px;         
 }
 
-.room-section .controls button.secondary {
-  background: #7f8c8d;
-}
-
-.room-section .controls button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(233,69,96,0.4);
-}
-
-/* Responsive for small screens */
-@media (max-width: 600px){
-  .room-section .controls {
-    justify-content: center; /* center align on mobile */
-  }
-  .room-section .controls button {
-    flex: 1 1 48%;           /* 2 buttons ek line me fit ho jaye, wrap ho jaye agar chhota ho */
-    text-align: center;
-  }
-}
-
-.piece.white { color: #fff; text-shadow: 0 0 4px #000; }
-.piece.black { color: #000; text-shadow: 0 0 4px #fff; }
+.piece.white { color: #fff; text-shadow: 0 0 2px #000; }
+.piece.black { color: #000; text-shadow: 0 0 2px #fff; }
 </style>
 </head>
 <body>
@@ -292,13 +290,17 @@ input{
       <div class="room-section" id="roomSection">
         <h3>🎮 Multiplayer Room</h3>
         <input id="roomId" placeholder="Enter Room ID">
-        <br><br>
-        <button onclick="createRoom()">CREATE ROOM</button>
-        <button onclick="joinRoom()">JOIN ROOM</button>
-        <!-- 👇 Reset + Flip buttons (shifted here, small size) -->
-        <div class="controls" style="margin-top:10px;">
-          <button id="resetBtn" style="padding:8px 14px;font-size:14px;">🔄 Reset</button>
-          <button id="flipBtn" class="secondary" style="padding:8px 14px;font-size:14px;">↻ Flip</button>
+        
+        <!-- Create/Join buttons row -->
+        <div class="controls">
+          <button onclick="createRoom()">CREATE ROOM</button>
+          <button onclick="joinRoom()">JOIN ROOM</button>
+        </div>
+
+        <!-- 👇 Reset + Flip buttons -->
+        <div class="controls">
+          <button id="resetBtn" class="secondary">🔄 Reset</button>
+          <button id="flipBtn" class="secondary">↻ Flip</button>
         </div>
       </div>
 
@@ -310,8 +312,8 @@ input{
 
       <!-- 👇 Player Info -->
       <div id="roomInfo" class="player-info" style="display:none;">
-        <div>Player 1 (White): <span id="p1">Waiting...</span></div>
-        <div>Player 2 (Black): <span id="p2">Waiting...</span></div>
+        <div>White: <span id="p1">Waiting...</span></div>
+        <div>Black: <span id="p2">Waiting...</span></div>
       </div>
 
       <!-- 👇 Right Panel (Status + Game Info) -->
@@ -320,24 +322,24 @@ input{
 
         <div style="font-size:13px;color:#ccc;margin:6px 0;">Game Info</div>
         <div style="display:flex; gap:8px;">
-          <div style="background:rgba(255,255,255,0.2);padding:12px;border-radius:8px;flex:1;text-align:center;">
+          <div style="background:rgba(255,255,255,0.2);padding:10px;border-radius:8px;flex:1;text-align:center;">
             <div style="font-size:12px;color:#ccc">Turn</div>
-            <div id="turnLabel" style="font-weight:700;font-size:18px">White</div>
+            <div id="turnLabel" style="font-weight:700;font-size:16px">White</div>
           </div>
         </div>
 
-        <div class="footer" style="margin-top:12px;text-align:center;">
-          <div>✅ Check • En Passant • Promotion • Castling • No King Capture</div>
+        <div class="footer">
+          <div>✅ Check • En Passant • Promotion</div>
         </div>
       </div>
 
     </div> <!-- board-wrap -->
   </div> <!-- app -->
-</body>
+
   <!-- Promotion modal -->
   <div id="promoModal" class="modal" style="display:none;">
     <div class="modal-card">
-      <div style="font-weight:700; font-size:20px; margin-right:16px; color:gold;">Promote Pawn:</div>
+      <div style="font-weight:700; font-size:18px; margin-right:10px; color:gold;">Promote:</div>
       <div class="promo-piece" data-piece="q">♛</div>
       <div class="promo-piece" data-piece="r">♜</div>
       <div class="promo-piece" data-piece="b">♝</div>
@@ -379,12 +381,6 @@ function initialBoard(){
   for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(b[r][c]) b[r][c].m=false;
   return b;
 }
-
-
-
-
-
-
 
 const boardEl = document.getElementById('chessboard');
 const statusEl = document.getElementById('status');
@@ -478,12 +474,11 @@ function onSquareClick(uiR, uiC){
         promoModal.style.display = 'flex';
       } else {
         applyMove(legal);
-        // FIXED: Sending enPassantTarget to friend
         socket.emit('move', {
           roomId, 
           board: board.map(row=>row.map(cell=>cell?{...cell}:null)), 
           turn,
-          enPassantTarget // MUST SEND THIS
+          enPassantTarget
         });
       }
       selected = null;
@@ -544,7 +539,6 @@ function generatePseudoMoves(r,c){
         }
       }
     }
-    // Normal Captures
     for(const dc of [-1,1]){
       const tr = r + dir, tc = c + dc;
       if(inside(tr,tc)){
@@ -558,11 +552,8 @@ function generatePseudoMoves(r,c){
         }
       }
     }
-    
-    // FIXED: En Passant logic IS NOW INSIDE the function
     if(enPassantTarget){
       const [er,ec] = enPassantTarget;
-      // Check if the pawn can land on the en passant target square diagonally
       if(er === r + dir && Math.abs(ec - c) === 1){
         pushMove(er,ec,'enpassant');
       }
@@ -619,7 +610,6 @@ function makeMoveOnBoard(m){
   const [fr,fc] = m.from, [tr,tc] = m.to;
   const piece = board[fr][fc];
 
-  // Handle en passant capture
   if(m.special === 'enpassant'){
     const capR = fr;
     const capC = tc;
@@ -632,12 +622,10 @@ function makeMoveOnBoard(m){
   board[tr][tc] = {...piece, m:true};
   board[fr][fc] = null;
 
-  // Promotion
   if(m.special === 'promotion'){
     board[tr][tc].t = m.promotionTo || 'q';
   }
 
-  // Set enPassant target if double move
   if(m.special === 'double'){
     enPassantTarget = [(fr + tr)/2, fc];
   } else {
@@ -660,7 +648,7 @@ function restoreState(s){
 
 function findKing(color){
   for(let r=0;r<8;r++) for(let c=0;c<8;c++){
-    const p = board[r][c];
+    const p=board[r][c];
     if(p && p.t==='k' && p.c===color) return [r,c];
   }
   return null;
@@ -684,15 +672,14 @@ function isKingInCheck(color){
   return false;
 }
 
-// Room functions
 function createRoom(){
-  roomId = generateRoomId();   // 👈 auto 4-digit
+  roomId = generateRoomId();   
   document.getElementById('roomId').value = roomId;
 
   myColor = 'w';
   socket.emit('createRoom', roomId);
 
-  document.getElementById('roomInfo').style.display = 'block';
+  document.getElementById('roomInfo').style.display = 'flex';
   document.getElementById('p1').textContent = 'You (White)';
   document.getElementById('p2').textContent = 'Waiting...';
 
@@ -704,7 +691,7 @@ function joinRoom(){
   if(!roomId) return alert('Room ID enter karo!');
   myColor = 'b';
   socket.emit('joinRoom', roomId);
-  document.getElementById('roomInfo').style.display = 'block';
+  document.getElementById('roomInfo').style.display = 'flex';
   const p1 = document.getElementById('p1');
   if(p1) p1.textContent = 'Opponent (White)';
   const p2 = document.getElementById('p2');
@@ -721,7 +708,6 @@ socket.on('playerJoined', () => {
 socket.on('opponentMove', (data) => {
   board = data.board.map(row=>row.map(cell=>cell?{...cell}:null));
   turn = data.turn;
-  // FIXED: Receiving enPassantTarget
   if(data.enPassantTarget) {
     enPassantTarget = data.enPassantTarget;
   } else {
@@ -730,7 +716,6 @@ socket.on('opponentMove', (data) => {
   render();
 });
 
-// Promotion handlers
 promoModal.querySelectorAll('.promo-piece').forEach(el=>{
   el.addEventListener('click', ()=>{
     if(pendingPromotion){
@@ -740,7 +725,7 @@ promoModal.querySelectorAll('.promo-piece').forEach(el=>{
         roomId, 
         board: board.map(row=>row.map(cell=>cell?{...cell}:null)), 
         turn,
-        enPassantTarget // Must send this even after promotion
+        enPassantTarget
       });
       pendingPromotion = null;
       promoModal.style.display='none';
@@ -755,7 +740,6 @@ promoModal.addEventListener('click', (e)=>{
   }
 });
 
-// Other buttons
 document.getElementById('resetBtn').addEventListener('click', ()=>{
   board = initialBoard();
   turn='w'; selected=null; legalMovesCache=[]; lastMove=null; enPassantTarget=null;
@@ -767,7 +751,6 @@ document.getElementById('flipBtn').addEventListener('click', ()=>{
 });
 
 render();
-</script>
 </script>
 </body>
 </html>

@@ -3,104 +3,216 @@
 <head>
 <meta charset="utf-8" />
 <title>Super Chess 8x8 (Human vs AI)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
-  :root{ --sq:110px; --gap:2mm; --light:#D4BCA2; --dark:#926942; --bg: #05395c; }
-  body{ margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#111; display:flex; flex-direction:column; align-items:center; padding:12px; user-select: none;}
-  h2{ margin:6px 0 12px 0; color:#fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 28px;}
+  :root{ 
+    --gap:2px; 
+    --light:#D4BCA2; 
+    --dark:#926942; 
+    --bg: #05395c; 
+    --text: #fff;
+  }
+  
+  body{ 
+    margin:0; 
+    font-family:Arial,Helvetica,sans-serif; 
+    background:var(--bg); 
+    color:var(--text); 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    padding:10px; 
+    user-select: none; 
+    box-sizing: border-box;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+  
+  h2{ 
+    margin:10px 0 15px 0; 
+    color:#fff; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+    font-size: clamp(20px, 5vw, 32px); /* Responsive font size */
+    text-align: center;
+  }
 
   /* Top control bar */
-  #topBar{ display:flex; gap:12px; margin-bottom:8px; flex-wrap: wrap; justify-content: center;}
-  button{ padding:10px 16px; border-radius:8px; border:0; background:#eee; color:#05395c; cursor:pointer; font-weight:700; font-size:14px; transition: all 0.2s; box-shadow: 0 4px 0 #bbb;}
+  #topBar{ 
+    display:flex; 
+    gap:8px; 
+    margin-bottom:10px; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+  }
+  
+  button{ 
+    padding:8px 12px; 
+    border-radius:6px; 
+    border:0; 
+    background:#eee; 
+    color:#05395c; 
+    cursor:pointer; 
+    font-weight:700; 
+    font-size:13px; 
+    transition: all 0.2s; 
+    box-shadow: 0 3px 0 #bbb;
+  }
   button:hover{ background:#fff; transform: translateY(-1px); }
-  button:active{ transform:translateY(3px); box-shadow: 0 1px 0 #bbb; }
+  button:active{ transform:translateY(2px); box-shadow: 0 1px 0 #bbb; }
   
   /* Specific button colors */
-  #playAI { background:#ff6b6b; color: white; box-shadow: 0 4px 0 #c92a2a; }
+  #playAI { background:#ff6b6b; color: white; box-shadow: 0 3px 0 #c92a2a; }
   #playAI:hover { background:#ff8787; }
   #playAI:active { box-shadow: 0 1px 0 #c92a2a; }
 
-  #playHuman { background:#51cf66; color: white; box-shadow: 0 4px 0 #2b8a3e; }
+  #playHuman { background:#51cf66; color: white; box-shadow: 0 3px 0 #2b8a3e; }
   #playHuman:hover { background:#69db7c; }
   #playHuman:active { box-shadow: 0 1px 0 #2b8a3e; }
 
-  #resetBtn, #undoBtn, #flipBtn { background:#4dabf7; color: white; box-shadow: 0 4px 0 #1864ab;}
+  #resetBtn, #undoBtn, #flipBtn { background:#4dabf7; color: white; box-shadow: 0 3px 0 #1864ab;}
   #resetBtn:hover, #undoBtn:hover, #flipBtn:hover { background:#74c0fc; }
   #resetBtn:active, #undoBtn:active, #flipBtn:active { box-shadow: 0 1px 0 #1864ab; }
 
 
   /* main wrapper */
-  .wrapper{ display:flex; flex-direction:column; align-items:center; }
+  .wrapper{ 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    width: 100%; 
+    max-width: 600px; /* Limit max width for better desktop look */
+  }
 
   /* board area with rank/file labels */
-  .board-area{ display:flex; align-items:flex-start; gap:8px; }
+  .board-area{ 
+    display:flex; 
+    align-items:flex-start; 
+    gap:4px; 
+    width: 100%; 
+  }
 
   /* rank labels (left) */
-  .ranks{ display:flex; flex-direction:column; justify-content:space-between; height: calc(var(--sq) * 8 + var(--gap) * 7); font-weight:700; font-size:14px; padding-top:0.5px; color: #ccc;}
+  .ranks{ 
+    display:flex; 
+    flex-direction:column; 
+    justify-content:space-between; 
+    height: 100%; /* Matches board height */
+    font-weight:700; 
+    font-size: clamp(10px, 2vw, 14px); 
+    color: #ccc;
+    width: 20px;
+  }
+  .rank-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 12.5%; /* 100% / 8 */
+  }
 
   /* board grid */
   #board{
     display:grid;
-    grid-template-columns: repeat(8, var(--sq));
-    grid-template-rows: repeat(8, var(--sq));
+    grid-template-columns: repeat(8, 1fr); /* Responsive 8 cols */
+    grid-template-rows: repeat(8, 1fr);    /* Responsive 8 rows */
     gap: var(--gap);
+    
+    width: 100%; 
+    aspect-ratio: 1 / 1; /* Force Square Shape */
     background: #05395c; /* shows gap lines */
-    padding:calc(var(--gap) / 2);
+    padding:calc(var(--gap)); /* Outer padding */
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     border-radius: 4px;
   }
-  .square{ width:var(--sq); height:var(--sq); display:flex; align-items:center; justify-content:center; font-size:60px; user-select:none; cursor:pointer; position:relative; border-radius: 4px;
-}
+  
+  .square{ 
+    width:100%; 
+    height:100%; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    /* Responsive piece size: smaller on mobile, bigger on desktop */
+    font-size: min(7vw, 55px); 
+    user-select:none; 
+    cursor:pointer; 
+    position:relative; 
+    border-radius: 2px;
+  }
   .light{ background:var(--light); }
   .dark{ background:var(--dark); }
 
-  .highlight{ outline:3px solid rgba(255, 255, 0, 0.6); box-sizing:border-box; z-index: 2; }
-  .selected{ outline:3px solid #00aaff; box-sizing:border-box; z-index: 2; }
+  .highlight{ outline:2px solid rgba(255, 255, 0, 0.6); box-sizing:border-box; z-index: 2; }
+  .selected{ outline:2px solid #00aaff; box-sizing:border-box; z-index: 2; background-color: rgba(0,170,255,0.1); }
 
   /* pieces */
-.piece{ pointer-events:none; }
-.white{
-  color:#fff;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000;
-}
-.black{
-  color:#000;
-  text-shadow: 0 0 5px rgba(255,255,255,0.4);
-}
+  .piece{ pointer-events:none; line-height: 1; }
+  .white{
+    color:#fff;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  }
+  .black{
+    color:#000;
+    text-shadow: 0 0 3px rgba(255,255,255,0.6);
+  }
 
-.square{
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow:
-    inset 2px 2px 5px rgba(255,255,255,0.3),
-    inset -2px -2px 5px rgba(0,0,0,0.3),
-    0 2px 5px rgba(0,0,0,0.2);
-}
-
-.square:hover{
-  transform: scale(1.02);
-  z-index: 10;
-}
+  .square{ transition: transform 0.1s ease; }
+  .square:hover{ transform: scale(1.02); z-index: 10; }
 
   /* file labels (bottom) */
-  .files{ display:flex; justify-content:space-between; width: calc(var(--sq)*8 + var(--gap)*7); margin-top:8px; font-weight:700; font-size:14px; color: #ccc;}
+  .files{ 
+    display:flex; 
+    justify-content:space-between; 
+    width: 100%; /* Matches board width */
+    margin-top:4px; 
+    font-weight:700; 
+    font-size: clamp(10px, 2vw, 14px); 
+    color: #ccc;
+  }
+  .file-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 12.5%; /* 100% / 8 */
+  }
 
   /* game info */
-  #gameInfo{ margin-top:16px; background:#fff; padding:10px 20px; border-radius:30px; font-weight:700; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 16px; min-width: 200px; text-align: center;}
+  #gameInfo{ 
+    margin-top:16px; 
+    background:rgba(255,255,255,0.1); 
+    padding:10px 20px; 
+    border-radius:20px; 
+    font-weight:700; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+    font-size: 16px; 
+    min-width: 200px; 
+    text-align: center; 
+    border: 1px solid rgba(255,255,255,0.2);
+  }
 
   /* winner popup */
-  #winnerPopup{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.9); background:#fff; padding:24px 32px; border-radius:12px; box-shadow:0 15px 40px rgba(0,0,0,0.4); font-weight:800; font-size:24px; display:none; z-index:9999; opacity: 0; transition: all 0.3s; text-align: center; border: 4px solid var(--bg); }
+  #winnerPopup{ 
+    position:fixed; 
+    left:50%; top:50%; 
+    transform:translate(-50%,-50%) scale(0.9); 
+    background:#fff; 
+    padding:24px 32px; 
+    border-radius:12px; 
+    box-shadow:0 15px 40px rgba(0,0,0,0.4); 
+    font-weight:800; 
+    font-size:24px; 
+    display:none; 
+    z-index:9999; 
+    opacity: 0; 
+    transition: all 0.3s; 
+    text-align: center; 
+    border: 4px solid var(--bg); 
+  }
   #winnerPopup.show{ opacity: 1; transform: translate(-50%,-50%) scale(1); }
   #winnerPopup button { margin-top: 15px; width: 100%; background: var(--bg); color: #fff; }
 
   /* Mobile adjustment */
-  @media (max-width: 700px) {
-    :root { --sq: 11vw; --gap: 1px; }
-    h2 { font-size: 20px; }
-    button { padding: 8px 12px; font-size: 12px; }
+  @media (max-width: 500px) {
+    #board { gap: 1px; padding: 2px; }
+    h2 { margin-bottom: 5px; }
+    #topBar { gap: 5px; }
   }
 </style>
 </head>
@@ -110,7 +222,7 @@
   <div id="topBar">
     <button id="playHuman">Human vs Human</button>
     <button id="playAI">Human vs Super AI</button>
-    <div style="width:1px; background:rgba(255,255,255,0.2); margin:0 4px;"></div>
+    <div style="width:1px; background:rgba(255,255,255,0.2); margin:0 2px;"></div>
     <button id="undoBtn">Undo</button>
     <button id="flipBtn">Flip</button>
     <button id="resetBtn">Reset</button>
@@ -118,10 +230,28 @@
 
   <div class="wrapper">
     <div class="board-area">
-      <div class="ranks" id="ranks"></div>
+      <div class="ranks" id="ranks">
+          <div class="rank-label">8</div>
+          <div class="rank-label">7</div>
+          <div class="rank-label">6</div>
+          <div class="rank-label">5</div>
+          <div class="rank-label">4</div>
+          <div class="rank-label">3</div>
+          <div class="rank-label">2</div>
+          <div class="rank-label">1</div>
+      </div>
       <div id="board" role="grid" aria-label="Chess board"></div>
     </div>
-    <div class="files" id="files"></div>
+    <div class="files" id="files">
+        <div class="file-label">a</div>
+        <div class="file-label">b</div>
+        <div class="file-label">c</div>
+        <div class="file-label">d</div>
+        <div class="file-label">e</div>
+        <div class="file-label">f</div>
+        <div class="file-label">g</div>
+        <div class="file-label">h</div>
+    </div>
     <div id="gameInfo">Turn: White</div>
   </div>
 
@@ -321,8 +451,6 @@ class ChessGame {
     // Promotion
     if((p==="P" && r2===0) || (p==="p" && r2===7)){
       const color = p==="P" ? "w" : "b";
-      // AI always promotes to Queen for simplicity in this demo
-      // But for human, we show dialog. AI handling is inside aiMove.
       if(color === 'w' && !AI) { 
           onPromotion(r2,c2,color); return true; 
       } else if (color === 'b' && AI) {
@@ -330,7 +458,6 @@ class ChessGame {
           this.turn = "w";
           return true;
       } else {
-          // Human playing black
           onPromotion(r2,c2,color); return true;
       }
     } else {
@@ -343,10 +470,7 @@ class ChessGame {
 /* ------------------------------
    Super AI (Minimax + AlphaBeta)
    ------------------------------ */
-// Piece values
 const pieceValues = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
-
-// Simplified Piece-Square Tables (Encourage center control)
 const pst = {
   p: [
     [0,  0,  0,  0,  0,  0,  0,  0],
@@ -368,7 +492,6 @@ const pst = {
     [-40,-20,  0,  5,  5,  0,-20,-40],
     [-50,-40,-30,-30,-30,-30,-40,-50]
   ],
-  // Simplified generic for others
   generic: [
     [0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0],
@@ -381,24 +504,12 @@ const pst = {
   ]
 };
 
-// Mirror PST for Black
 function getPstValue(piece, r, c) {
   const type = piece.toLowerCase();
   const table = pst[type] || pst.generic;
-  const row = piece === piece.toUpperCase() ? r : 7 - r; // White from top (index 0), Black from bottom (index 7) visual, but logic is white at bottom? 
-  // Wait, logic: Board[0] is Black pieces (r8), Board[7] is White pieces (r1).
-  // So for White (Uppercase), index 7 is rank 1. 
-  // Let's standardise: PST defined for White (Rank 1 is bottom).
-  // My board array: row 0 is rank 8 (Black side). Row 7 is rank 1 (White side).
-  
   let val = 0;
-  if (piece === piece.toUpperCase()) {
-      // White
-      val = table[7-r][c];
-  } else {
-      // Black
-      val = table[r][c];
-  }
+  if (piece === piece.toUpperCase()) val = table[7-r][c];
+  else val = table[r][c];
   return val;
 }
 
@@ -410,51 +521,31 @@ function evaluateBoard(board) {
       if (!p) continue;
       const val = pieceValues[p.toLowerCase()];
       const posVal = getPstValue(p, r, c);
-      
-      if (p === p.toUpperCase()) {
-        score += (val + posVal);
-      } else {
-        score -= (val + posVal);
-      }
+      if (p === p.toUpperCase()) score += (val + posVal);
+      else score -= (val + posVal);
     }
   }
   return score;
 }
 
-// AI helpers
 function getAllMoves(board, color) {
   let moves = [];
   for(let r=0;r<8;r++) {
     for(let c=0;c<8;c++) {
       const p = board[r][c];
       if(p && ((color==='w' && p===p.toUpperCase()) || (color==='b' && p===p.toLowerCase()))) {
-        // We need legal moves (not pseudo). 
-        // To avoid recursion depth issues in a simple implementation, we check legality via simulation
-        // but calling game.wouldBeInCheck is easier if we use the game instance temporarily?
-        // For speed in Minimax, we'll use pseudo-legal moves and filter simple checks.
-        // Actually, for robust AI, let's rely on game's logic but we need to simulate on a temp board.
-        // To keep code single-file and simple, we will iterate pseudo moves and check validity.
-        
-        // Hack: We temporarily modify game.board to check legality, then restore.
-        // This is slow but correct.
         const originalBoard = game.cloneBoard();
-        game.board = board; // Use the simulated board
-        
-        // NOTE: This requires `movesFor` to work on the current board.
-        // But `movesFor` is a method of game. 
+        game.board = board; 
         const pseudos = game.movesFor(r,c);
-        
         for(const m of pseudos){
              if(!game.wouldBeInCheckAfterMove([r,c], m, color)){
                  moves.push({ from:[r,c], to:m, val: board[m[0]][m[1]] ? pieceValues[board[m[0]][m[1]].toLowerCase()] : 0 });
              }
         }
-        
-        game.board = originalBoard; // Restore
+        game.board = originalBoard; 
       }
     }
   }
-  // Sort moves: Captures first (Move Ordering for Alpha-Beta)
   moves.sort((a,b) => b.val - a.val);
   return moves;
 }
@@ -462,29 +553,19 @@ function getAllMoves(board, color) {
 const MAX_DEPTH = 3;
 
 function minimax(depth, alpha, beta, isMaximizing) {
-  if (depth === 0) {
-    return evaluateBoard(game.board);
-  }
-
+  if (depth === 0) return evaluateBoard(game.board);
   const color = isMaximizing ? 'w' : 'b';
   const moves = getAllMoves(game.board, color);
-
   if (moves.length === 0) {
-    if (game.isInCheck(color)) {
-      return isMaximizing ? -100000 : 100000; // Checkmate
-    }
-    return 0; // Stalemate
+    if (game.isInCheck(color)) return isMaximizing ? -100000 : 100000;
+    return 0; 
   }
-
   if (isMaximizing) {
     let maxEval = -Infinity;
     for (const move of moves) {
-      // Save state
       const captured = game.board[move.to[0]][move.to[1]];
       const moved = game.board[move.from[0]][move.from[1]];
       const oldEnPassant = game.enPassant;
-      
-      // Make move (Simplified internal move logic for speed)
       game.board[move.to[0]][move.to[1]] = moved;
       game.board[move.from[0]][move.from[1]] = "";
       if(moved.toLowerCase()==='p' && Math.abs(move.to[0]-move.from[0])===2) game.enPassant=[(move.from[0]+move.to[0])/2,move.from[1]];
@@ -492,11 +573,9 @@ function minimax(depth, alpha, beta, isMaximizing) {
       
       const ev = minimax(depth - 1, alpha, beta, false);
       
-      // Undo
       game.board[move.from[0]][move.from[1]] = moved;
       game.board[move.to[0]][move.to[1]] = captured;
       game.enPassant = oldEnPassant;
-
       maxEval = Math.max(maxEval, ev);
       alpha = Math.max(alpha, ev);
       if (beta <= alpha) break;
@@ -508,7 +587,6 @@ function minimax(depth, alpha, beta, isMaximizing) {
       const captured = game.board[move.to[0]][move.to[1]];
       const moved = game.board[move.from[0]][move.from[1]];
       const oldEnPassant = game.enPassant;
-
       game.board[move.to[0]][move.to[1]] = moved;
       game.board[move.from[0]][move.from[1]] = "";
       if(moved.toLowerCase()==='p' && Math.abs(move.to[0]-move.from[0])===2) game.enPassant=[(move.from[0]+move.to[0])/2,move.from[1]];
@@ -519,7 +597,6 @@ function minimax(depth, alpha, beta, isMaximizing) {
       game.board[move.from[0]][move.from[1]] = moved;
       game.board[move.to[0]][move.to[1]] = captured;
       game.enPassant = oldEnPassant;
-
       minEval = Math.min(minEval, ev);
       beta = Math.min(beta, ev);
       if (beta <= alpha) break;
@@ -529,30 +606,22 @@ function minimax(depth, alpha, beta, isMaximizing) {
 }
 
 function getBestMove() {
-  // AI plays Black (minimizing)
   let bestVal = Infinity;
   let bestMove = null;
   const moves = getAllMoves(game.board, 'b');
-  
-  // Shuffle equal moves to add variety
   if (moves.length === 0) return null;
-
   for (const move of moves) {
     const captured = game.board[move.to[0]][move.to[1]];
     const moved = game.board[move.from[0]][move.from[1]];
     const oldEnPassant = game.enPassant;
-
     game.board[move.to[0]][move.to[1]] = moved;
     game.board[move.from[0]][move.from[1]] = "";
     if(moved.toLowerCase()==='p' && Math.abs(move.to[0]-move.from[0])===2) game.enPassant=[(move.from[0]+move.to[0])/2,move.from[1]];
     else game.enPassant=null;
-
     const moveVal = minimax(MAX_DEPTH - 1, -Infinity, Infinity, true);
-
     game.board[move.from[0]][move.from[1]] = moved;
     game.board[move.to[0]][move.to[1]] = captured;
     game.enPassant = oldEnPassant;
-
     if (moveVal < bestVal) {
       bestVal = moveVal;
       bestMove = move;
@@ -602,8 +671,6 @@ function onPromotion(r,c,color){
    UI & Controls
    ------------------------------ */
 const boardDiv = document.getElementById("board");
-const ranksDiv = document.getElementById("ranks");
-const filesDiv = document.getElementById("files");
 const gameInfoDiv = document.getElementById("gameInfo");
 const winnerPopup = document.getElementById("winnerPopup");
 const winnerText = document.getElementById("winnerText");
@@ -611,23 +678,6 @@ const winnerText = document.getElementById("winnerText");
 let flipped=false;
 let legal=[]; 
 let AI=false;
-
-function buildCoords(){
-  ranksDiv.innerHTML = "";
-  for(let i=8;i>=1;i--){
-    const d = document.createElement("div");
-    d.style.height = "calc(var(--sq))";
-    d.style.display = "flex"; d.style.alignItems = "center"; d.style.justifyContent = "center";
-    d.textContent = i; ranksDiv.appendChild(d);
-  }
-  filesDiv.innerHTML="";
-  const files = ['a','b','c','d','e','f','g','h'];
-  files.forEach(f=>{
-    const d=document.createElement("div");
-    d.style.width = "calc(var(--sq))"; d.style.textAlign = "center";
-    d.textContent = f; filesDiv.appendChild(d);
-  });
-}
 
 function render(){
   boardDiv.innerHTML = "";
@@ -666,7 +716,6 @@ boardDiv.addEventListener("click", (e)=>{
   const r = +el.dataset.r; const c = +el.dataset.c;
   const p = game.board[r][c];
 
-  // Prevent interaction during AI turn
   if(AI && game.turn==="b") return;
 
   if(p && ((game.turn==="w" && game.isWhite(p)) || (game.turn==="b" && game.isBlack(p)))){
@@ -706,15 +755,12 @@ function highlightSquares(lst){
    ------------------------------ */
 function aiMove(){
   updateInfo("AI Thinking...");
-  // Small delay to let UI render "Thinking" text
   setTimeout(() => {
     const best = getBestMove();
     if(best){
       game.move(best.from, best.to);
     } else {
-      // No legal moves (Mate or Stalemate)
-      // Trigger check manually if needed, but move loop handles logic?
-      // If AI cannot move, it's game over.
+      // Checkmate/Stalemate logic handled in postMoveChecks
     }
     render();
     postMoveChecks();
@@ -727,7 +773,6 @@ function aiMove(){
 function postMoveChecks(){
   const cur = game.turn;
   const anyLegal = playerHasAnyLegalMove(cur);
-
   if(!anyLegal){
     if(game.isInCheck(cur)){
       const winner = cur==='w' ? 'Black' : 'White';
@@ -759,12 +804,7 @@ function showWinner(who){
    Button Listeners
    ------------------------------ */
 document.getElementById("undoBtn").onclick = ()=>{
-  // If vs AI, undo twice (player + AI)
-  if(AI) {
-     game.undo(); game.undo(); 
-  } else {
-     game.undo();
-  }
+  if(AI) { game.undo(); game.undo(); } else { game.undo(); }
   render();
 };
 
@@ -773,22 +813,21 @@ document.getElementById("resetBtn").onclick = ()=>{
 };
 
 document.getElementById("flipBtn").onclick = ()=>{
-  flipped = !flipped; buildCoords(); render();
+  flipped = !flipped; render();
 };
 
 document.getElementById("playHuman").onclick = ()=>{
-  AI = false; game.reset(); flipped = false; buildCoords(); render();
+  AI = false; game.reset(); flipped = false; render();
 };
 
 document.getElementById("playAI").onclick = ()=>{
-  AI = true; game.reset(); flipped = false; buildCoords(); render();
+  AI = true; game.reset(); flipped = false; render();
 };
 
 /* ------------------------------
    Init
    ------------------------------ */
 const game = new ChessGame();
-buildCoords();
 render();
 window._game = game;
 
