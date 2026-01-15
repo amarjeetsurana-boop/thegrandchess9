@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <title>TheGrandChess9 • Fixed & Smooth</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<script src="/socket.io/socket.io.js"></script>
 <style>
 /* ================= ROOT ================= */
 :root{
@@ -13,8 +14,7 @@
   --shadow:rgba(0,0,0,0.25);
   --accent:#2d9cdb;
   --accent-2:#2ecc71;
-
-  --gap:3px; /* Gap variable rakh liya hai */
+  --gap:0px; /* Gap kam kar diya agar chahte ho to 2px badha dein */
 }
 
 *{
@@ -32,7 +32,6 @@ body{
   flex-direction:column;
   align-items:center;
   padding:12px;
-  /* overflow hata diya taaki agar jyada ho to dikhaye */
 }
 
 /* ================= HEADER ================= */
@@ -89,14 +88,15 @@ button.active{
   box-shadow:0 3px 8px var(--shadow);
   max-width:820px;
   width:100%;
-  /* height remove kar diya taaki content fit ho */
+  /* Fixed height hata di taaki content ke hisaab se expand ho */
 }
 
 /* ================= BOARD GRID ================= */
 .left-board{
   display:grid;
-  grid-template-columns: 44px 1fr; /* Labels aur Board (Flex) */
-  grid-template-rows: auto 44px; /* Height Board pe depend karegi */
+  /* Responsive Grid: Labels thik se fit hon */
+  grid-template-columns: 44px 1fr; 
+  grid-template-rows: auto 44px; /* Height board pe depend karegi (Jumping fix) */
   gap:6px;
   width: 100%;
 }
@@ -105,10 +105,10 @@ button.active{
 .rank-labels{
   display:flex;
   flex-direction:column;
-  height: 100%; /* ⭐ Board ke barabar height lega */
+  height: 100%; /* Board jitna height lega */
 }
 .rank-label{
-  flex: 1; /* ⭐ Apne aap space distribute karega (Jumping rokne ke liye) */
+  flex: 1; /* ⭐ Labels apne aap space distribute karenge (No jumping) */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -120,10 +120,10 @@ button.active{
 /* ================= FILE LABELS ================= */
 .file-labels{
   display:flex;
-  width: 100%; /* ⭐ Board ke barabar width lega */
+  width: 100%; /* Board jitna width lega */
 }
 .file-label{
-  flex: 1; /* ⭐ Apne aap space distribute karega */
+  flex: 1; /* ⭐ Labels apne aap space distribute karenge */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -140,49 +140,47 @@ button.active{
 
 .chessboard{
   display:grid;
-  /* ⭐ Responsive Grid: Pixels hata kar fractions use kiye */
+  /* ⭐ Responsive Grid (Fixed pixels hata diye) */
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
   gap:var(--gap);
   border-radius:8px;
   overflow:hidden;
 
-  /* ⭐ MAIN FIX: Square Shape Force Karna */
+  /* ⭐ MAIN FIX: Board ko Square banayein */
   width: 100%;
   height: auto;
-  aspect-ratio: 1 / 1; /* Board hamesha square rahega */
+  aspect-ratio: 1 / 1; /* Isse board kabhi stretch nahi hoga */
 }
 
 /* ================= SQUARES ================= */
 .square{
-  width:100%;
-  height:100%;
+  width: 100%;
+  height: 100%;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
 
-  /* Gold/Silver Colors (Peeche request kiya tha, ye raha fix) */
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.75), inset 0 -4px 0 rgba(0,0,0,.25);
+  /* 3D Effect Logic (Optional, agar chahiye to rahne dein, nahi to hata do) */
+  box-shadow: inset 2px 2px 4px rgba(255,255,255,0.4), inset -2px -2px 4px rgba(0,0,0,0.25);
   transition:transform .1s ease, box-shadow .1s ease;
 }
 
 .square:active{
   transform:translateY(1px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.25);
+  box-shadow: inset 1px 1px 2px rgba(255,255,255,0.4), inset -1px -1px 2px rgba(0,0,0,0.25);
 }
 
-/* Gold Color */
+/* ⭐ GOLD COLOR (Light Squares) */
 .square.light{
-  background: #FFD700;
-  /* Thoda gradient for 3D look */
+  background: #FFD700; /* Gold */
   background: linear-gradient(145deg, #ffec8b, #d4af37);
 }
 
-/* Silver Color */
+/* ⭐ SILVER COLOR (Dark Squares) */
 .square.dark{
-  background: #C0C0C0;
-  /* Thoda gradient for 3D look */
+  background: #C0C0C0; /* Silver */
   background: linear-gradient(145deg, #e6e6e6, #a9a9a9);
 }
 
@@ -191,16 +189,18 @@ button.active{
   outline:3px solid #3498db;
   z-index:2;
 }
+
 .square.highlight{
   outline:3px solid #2ecc71;
 }
+
 .square.last-move{
   box-shadow: inset 0 0 0 3px rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.25);
 }
 
-/* ================= PIECES ================= */
+/* ================= PIECES (RESPONSIVE FIX) ================= */
 img.piece{
-  width: 90%; /* Square ke relative size */
+  width: 90%; /* Square ke hisaab se % mein size lo (Responsive) */
   height: 90%;
   user-select:none;
   pointer-events:none;
@@ -279,7 +279,7 @@ img.piece{
   box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
 
-/* ================= RESPONSIVE ================= */
+/* ================= RESPONSIVE MOBILE ================= */
 @media (max-width: 860px){
   .left-board {
     grid-template-columns: 30px 1fr;
