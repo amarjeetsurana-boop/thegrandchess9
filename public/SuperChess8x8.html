@@ -83,30 +83,25 @@
   }
 
   /* board area with rank/file labels */
-  .board-area{ 
-    display:flex; 
-    align-items:flex-start; 
-    gap:4px; 
-    width: 100%; 
-  }
-
+.board-area{
+  display: grid;
+  grid-template-columns: 20px 1fr; /* ranks | board */
+  gap: 4px;
+  width: 100%;
+}
   /* rank labels (left) */
-  .ranks{ 
-    display:flex; 
-    flex-direction:column; 
-    justify-content:space-between; 
-    height: 100%; /* Matches board height */
-    font-weight:700; 
-    font-size: clamp(10px, 2vw, 14px); 
-    color: #ccc;
-    width: 20px;
-  }
-  .rank-label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 12.5%; /* 100% / 8 */
-  }
+  .ranks{
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  font-weight:700;
+  font-size: clamp(10px, 2vw, 14px);
+  color:#ccc;
+}
+  .rank-label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
   /* board grid */
   #board{
@@ -129,8 +124,18 @@
     display:flex; 
     align-items:center; 
     justify-content:center; 
-    /* Responsive piece size: smaller on mobile, bigger on desktop */
-    font-size: min(7vw, 55px); 
+    
+    /* --- YAHAN CHANGE KAREIN --- */
+    /* Pehle: min(7vw, 55px) */
+    
+    /* Option 1: Thoda chhota (Recommended) */
+    font-size: min(6vw, 45px); 
+    
+    /* Option 2: Bahut chhota agar zarurat ho */
+    /* font-size: min(5vw, 40px); */
+    
+    /* --------------------------- */
+    
     user-select:none; 
     cursor:pointer; 
     position:relative; 
