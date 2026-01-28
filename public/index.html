@@ -115,10 +115,29 @@ header{
     color: #fef08a;
 }
 
+/* Password input container */
+.password-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 18px;
+  user-select: none;
+}
+
 /* Inputs & Buttons - Optimized for touch */
 input{ 
   width:100%; 
   padding:12px; 
+  padding-right: 40px; /* Space for the eye icon */
   border-radius:8px; 
   border:1px solid var(--border); 
   background:#020617; 
@@ -316,7 +335,10 @@ iframe{
     <!-- LOGIN FORM -->
     <div id="authForm">
         <input id="email" placeholder="Email Address" type="email" autocomplete="email">
-        <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+        <div class="password-container">
+            <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+            <span class="password-toggle" id="passwordToggle">👁️</span>
+        </div>
         <button id="loginBtn" class="primary">Login</button>
         <button id="signupBtn">Sign Up</button>
         <button id="forgotBtn" class="outline">Forgot Password?</button>
@@ -419,6 +441,7 @@ const auth = getAuth(app);
 const elements = {
   email: document.getElementById("email"),
   password: document.getElementById("password"),
+  passwordToggle: document.getElementById("passwordToggle"),
   loginBtn: document.getElementById("loginBtn"),
   signupBtn: document.getElementById("signupBtn"),
   logoutBtn: document.getElementById("logoutBtn"),
@@ -439,6 +462,13 @@ const elements = {
   gameLoading: document.getElementById('gameLoading'),
   gameFrame: document.getElementById('gameFrame')
 };
+
+// Password visibility toggle
+elements.passwordToggle.addEventListener('click', function() {
+    const type = elements.password.getAttribute('type') === 'password' ? 'text' : 'password';
+    elements.password.setAttribute('type', type);
+    this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+});
 
 // Debounce function for performance
 function debounce(func, wait) {
@@ -489,6 +519,11 @@ elements.signupBtn.onclick = () => {
   const pass = elements.password.value.trim();
   if(!email || !pass) return showToast("Please fill all fields", 'error');
 
+  // Password validation
+  if(pass.length < 6) {
+    return showToast("Password must be at least 6 characters", 'error');
+  }
+
   createUserWithEmailAndPassword(auth, email, pass)
   .then(({user}) => {
     const actionCodeSettings = {
@@ -498,10 +533,13 @@ elements.signupBtn.onclick = () => {
 
     sendEmailVerification(user, actionCodeSettings)
     .then(() => {
-        showToast("Verification email sent!", 'success');
+        showToast("Verification email sent! Please check your inbox.", 'success');
         if (!isMobile) {
-            alert("EMAIL SENT!\n\nPlease check your inbox or Spam folder.");
+            alert("EMAIL SENT!\n\nPlease check your inbox or Spam folder.\n\nAfter verifying, you can login to play.");
         }
+        // Clear form fields
+        elements.email.value = '';
+        elements.password.value = '';
         signOut(auth); 
     })
     .catch((err) => {
@@ -509,7 +547,16 @@ elements.signupBtn.onclick = () => {
         showToast("Error: " + err.message, 'error');
     });
   })
-  .catch(err => showToast(err.message, 'error'));
+  .catch(err => {
+    // Provide more specific error messages
+    let errorMessage = err.message;
+    if(err.code === 'auth/email-already-in-use') {
+      errorMessage = "This email is already registered. Please login or use a different email.";
+    } else if(err.code === 'auth/weak-password') {
+      errorMessage = "Password is too weak. Please use a stronger password.";
+    }
+    showToast(errorMessage, 'error');
+  });
 }
 
 // LOGIN LOGIC
@@ -523,12 +570,24 @@ elements.loginBtn.onclick = () => {
     if(user.emailVerified){
         updateUI(user);
         showToast("Logged in successfully!", 'success');
+        // Clear form fields
+        elements.email.value = '';
+        elements.password.value = '';
     } else {
         showToast("Please verify your email first.", 'error');
         updateUI(user);
     }
   })
-  .catch(err => showToast(err.message, 'error'));
+  .catch(err => {
+    // Provide more specific error messages
+    let errorMessage = err.message;
+    if(err.code === 'auth/user-not-found') {
+      errorMessage = "User not found. Please check your email or sign up.";
+    } else if(err.code === 'auth/wrong-password') {
+      errorMessage = "Incorrect password. Please try again.";
+    }
+    showToast(errorMessage, 'error');
+  });
 }
 
 // LOGOUT
