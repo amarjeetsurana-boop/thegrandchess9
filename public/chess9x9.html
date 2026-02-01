@@ -146,7 +146,7 @@ button.active{
   /* ⭐ Responsive Grid (Fixed pixels hata diye) */
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
-  gap:2px;
+  gap:4px;
   border-radius:8px;
   overflow:hidden;
 
@@ -322,7 +322,9 @@ img.piece{
 <div class="options" role="toolbar">
   <button id="btnHvh" onclick="setMode('hvh')">Human vs Human</button>
   <button id="btnHvo" onclick="setMode('hvo')">Human vs Online Friend</button>
-  <button onclick="document.getElementById('infoModal').style.display='flex'">📜 Rules</button>
+  <a href="rules.html" target="_blank">
+  <button>📜 Rules</button>
+</a>
 </div>
 
 <div id="online-controls" style="display:none; background:white; padding:10px; border-radius:8px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
