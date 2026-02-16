@@ -2,127 +2,148 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TheGrandChess9 • Play Online Chess</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>TheGrandChess9 • Secure Portal</title>
 
 <style>
-:root{
-  --bg:#0f172a;
-  --panel:#1e293b;
-  --accent:#22c55e;
-  --accent-hover:#16a34a;
-  --danger:#e94560;
-  --text:#e5e7eb;
-  --text-muted:#94a3b8;
-  --border:rgba(255,255,255,.08);
-  --header-height: 60px;
+:root {
+  --bg-dark: #0f172a;
+  --bg-panel: #1e293b;
+  --primary: #22c55e;
+  --primary-hover: #16a34a;
+  --danger: #ef4444;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: rgba(255,255,255, 0.1);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-html { 
-  scroll-behavior: smooth; 
-  scroll-padding-top: calc(var(--header-height) + 20px);
-  -webkit-text-size-adjust: 100%;
-}
-
-body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-  background:linear-gradient(180deg,#0f172a,#020617);
-  color:var(--text);
-  min-height:100vh;
-  display:flex; flex-direction:column;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-.brand {
+header {
+    height: 60px;
+    background: #1e293b; /* Yeh Light Dark Blue hai (Black nahi) */
+    border-bottom: 1px solid rgba(255,255,255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Thoda shadow add kiya */
+  }
+
+
+/* Logo Link Styling */
+.brand-link {
+  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 22px;
-  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.brand-link:hover {
+  opacity: 0.8;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
 }
 
 .brand-logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  background: #ffffff;
-  padding: 4px;
-  border-radius: 10%;
-  box-shadow:
-    0 0 6px rgba(255,255,255,0.6),
-    0 0 12px rgba(34,197,94,0.6);
+  width: 36px;
+  height: 36px;
+  background: white;
+  border-radius: 6px;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  color: var(--bg-dark);
+  font-weight: 900;
+  font-size: 20px;
 }
 
-/* Header - Optimized for mobile */
-header{ 
-  display:flex; justify-content:space-between; align-items:center; padding:0 16px; 
-  height: var(--header-height);
-  background:rgba(2, 6, 23, 0.95); border-bottom:1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
-  /* Removed backdrop-filter for mobile performance */
+.app-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 60px);
 }
 
-.brand{font-size:18px;font-weight:700; display:flex; align-items:center; gap:8px;}
-.brand span{color:var(--accent)}
-
-.nav { display: none; } 
-
-/* Main Layout - Mobile First */
-.app{ display:flex; flex-direction: column; min-height:calc(100vh - var(--header-height));}
-
-/* Sidebar - Optimized */
-.sidebar{ 
-  background:rgba(15, 23, 42, 0.95); 
-  padding:16px; 
-  border-bottom:1px solid var(--border);
-  display:flex; flex-direction:column; gap:16px;
-  order: 2;
+.sidebar {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.card{ 
-  background:var(--panel); 
-  padding:16px; 
-  border-radius:12px; 
-  border:1px solid var(--border);
-  will-change: transform;
+.main-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
 }
 
-.card h3{
-  margin-bottom:10px;
-  font-size:13px; 
-  text-transform:uppercase; 
-  color:var(--text-muted); 
-  letter-spacing:1px;
+.card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
 }
 
-/* Lock & Verification Screens - Simplified */
-.locked-msg, .verify-msg {
-    text-align: center;
-    padding: 15px;
-    border: 1px dashed var(--text-muted);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-size:13px;
+.card-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  font-weight: 700;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.verify-msg {
-    background: rgba(234, 179, 8, 0.1);
-    border-color: #eab308;
-    color: #fef08a;
-}
-
-/* Password input container */
-.password-container {
+.input-group {
   position: relative;
-  width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
-.password-toggle {
+.input-group input {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.input-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.toggle-password {
   position: absolute;
   right: 12px;
   top: 50%;
@@ -133,600 +154,604 @@ header{
   user-select: none;
 }
 
-/* Inputs & Buttons - Optimized for touch */
-input{ 
-  width:100%; 
-  padding:12px; 
-  padding-right: 40px; /* Space for the eye icon */
-  border-radius:8px; 
-  border:1px solid var(--border); 
-  background:#020617; 
-  color:white; 
-  margin-bottom:10px; 
-  outline:none;
-  font-size:16px; /* Prevents zoom on iOS */
-  -webkit-appearance: none;
-}
-
-input:focus{border-color:var(--accent)}
-
-button{ 
-  width:100%; 
-  padding:12px; 
-  margin-bottom:8px; 
-  border-radius:8px; 
-  border:none; 
-  background:#334155; 
-  color:white; 
-  font-weight:600; 
-  cursor:pointer;
-  font-size:14px; 
-  transition: background-color 0.2s ease;
-  -webkit-tap-highlight-color: rgba(255,255,255,0.1);
-  touch-action: manipulation;
-}
-
-button:hover{ background:#475569;}
-button:active{ transform: scale(0.98); }
-button.primary{ background:var(--accent); color:#052e16;}
-button.primary:hover{ background:var(--accent-hover);}
-button.outline { background:transparent; border:1px solid var(--text-muted); color:var(--text-muted); }
-button.outline:hover { border-color:white; color:white; }
-
-/* Main Content - Optimized */
-.main-content{ 
-  padding:16px; 
-  display:flex; 
-  flex-direction:column; 
-  gap:16px;
-  order: 1;
-  flex: 1;
-}
-
-/* Game Section - Performance Optimized */
-#gameSection { 
-  display:none; 
-  height: 70vh; /* Reduced for mobile */
-  width: 100%; 
-  margin-bottom:16px; 
-  margin-top: 10px;
-  position: relative;
-  transform: translateZ(0); /* Hardware acceleration */
-  will-change: transform;
-}
-
-iframe{ 
-  width:100%; 
-  height:100%; 
-  border:none; 
-  border-radius:12px; 
-  background:black;
-  /* Performance optimizations */
-  transform: translateZ(0);
-  will-change: contents;
-}
-
-/* Game Loading Spinner - Simplified */
-.game-loading {
-  position: absolute;
-  top: 0;
-  left: 0;
+.btn {
   width: 100%;
-  height: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(15, 23, 42, 0.9);
-  border-radius: 12px;
-  z-index: 10;
+  gap: 8px;
+  margin-bottom: 10px;
 }
+
+.btn-primary { background: var(--primary); color: #052e16; }
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+
+.btn:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-bottom-color: transparent;
   border-radius: 50%;
-  border-top-color: var(--accent);
   animation: spin 1s linear infinite;
-  /* Performance optimization */
-  will-change: transform;
-  transform: translateZ(0);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Warning Box - Simplified */
-.warning-box { 
-  background: rgba(233, 69, 96, 0.1); 
-  border: 1px solid var(--danger); 
-  padding:12px; 
-  border-radius:8px; 
-  font-size:12px; 
-  color: #fca5a5; 
-  margin-top:10px;
-}
-
-/* Toast Notification - Optimized */
-#toast{
-  position: fixed;
-  top: calc(var(--header-height) + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateZ(0);
-  background: var(--panel);
-  padding: 12px 20px;
-  border-radius: 12px;
-  border-left: 4px solid var(--accent);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  z-index: 9999;
-  width: 90%;
-  max-width: 420px;
-  text-align: center;
+.status-box {
+  padding: 12px;
+  border-radius: 8px;
   font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 16px;
+  display: none;
+}
+.status-warning {
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  color: #fde047;
+  display: block;
+}
+.status-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+  display: block;
+}
+
+/* Game Grid Styling */
+.game-section {
+  margin-bottom: 20px;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.game-btn {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 15px 10px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.game-btn small {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.game-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.hero-placeholder {
+  text-align: center;
+  max-width: 500px;
+}
+.hero-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.game-frame-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: none;
+  flex-direction: column;
+}
+
+iframe {
+  width: 100%;
+  height: 120vh; /* 80vh ko 160vh kar diya (Double) */
+  border: none;
+  border-radius: 12px;
+  background: #000;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+#toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #1e293b;
+  border: 1px solid var(--border);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 14px;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+  z-index: 100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  will-change: opacity, transform;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-#toast.show{
+#toast.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0) translateZ(0);
+  transform: translateX(-50%) translateY(0);
 }
-
-/* Desktop Optimizations */
-@media (min-width: 769px) {
-    .app { 
-      display: grid; 
-      grid-template-columns: 280px 1fr; 
-    }
-    .sidebar { 
-      order: 1; 
-      border-bottom: none;
-      border-right: 1px solid var(--border);
-    }
-    .main-content { 
-      order: 2; 
-    }
-    .nav { display: block; }
-    #gameSection { height: 85vh; }
-    header {
-      backdrop-filter: blur(10px); /* Re-enable for desktop */
-    }
-}
+#toast.success { border-color: var(--primary); color: var(--primary); }
+#toast.error { border-color: var(--danger); color: var(--danger); }
 
 @media (max-width: 768px) {
-    .sidebar { padding: 12px; }
-    .main-content { padding: 12px; }
-    #gameSection { height: 60vh; }
-    .brand { font-size: 16px; }
-    .brand-logo { width: 40px; height: 40px; }
-}
-
-/* Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+  .app-container { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); order: 2; }
+  .main-content { order: 1; min-height: 50vh; }
+  iframe { height: 60vh; }
 }
 </style>
 </head>
-
 <body>
 
-<div id="toast">Notification Message</div>
+<div id="toast">
+  <span id="toast-icon"></span>
+  <span id="toast-msg">Notification</span>
+</div>
 
 <header>
-  <div class="brand">
-  <img src="img/Logo.png" alt="TheGrandChess9 Logo" class="brand-logo">
-  <span>TheGrandChess9</span>
-</div>
+    <div style="display: flex; align-items: center; gap: 12px; height: 60px;">
+    
+    <!-- LOGO WITH LINK (White Border added for visibility) -->
+    <a href="index.html" style="text-decoration: none; display: flex; align-items: center;">
+      <img src="img/Logo.png" alt="TheGrandChess9 Logo" 
+           style="height: 40px; width: auto; 
+                  padding: 4px; background: white; 
+                  border-radius: 6px; object-fit: contain;">
+    </a>
+
+    <!-- BRAND NAME -->
+    <div class="brand">TheGrandChess9</div>
+    
+  </div>
+  
+  <div style="font-size:12px; color:var(--text-muted);" id="connectionStatus">● System Ready</div>
 </header>
 
-<div class="app">
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="card">
-    <h3>🔐 Account</h3>
+<div class="app-container">
+  
+  <aside class="sidebar">
     
-    <!-- LOGIN FORM -->
-    <div id="authForm">
-        <input id="email" placeholder="Email Address" type="email" autocomplete="email">
-        <div class="password-container">
-            <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-            <span class="password-toggle" id="passwordToggle">👁️</span>
+    <!-- 1. AUTH FORM -->
+    <div id="authSection" class="card">
+      <div class="card-title">🔐 Account Access</div>
+      
+      <form id="authForm" onsubmit="return false;">
+        <div class="input-group">
+          <input type="email" id="email" placeholder="Email Address" required autocomplete="email">
         </div>
-        <button id="loginBtn" class="primary">Login</button>
-        <button id="signupBtn">Sign Up</button>
-        <button id="forgotBtn" class="outline">Forgot Password?</button>
-    </div>
-
-    <!-- PROFILE (Logged In but NOT Verified) -->
-    <div id="verifyProfile" style="display:none;">
-        <div class="verify-msg" style="margin-bottom:10px;">
-            ⚠️ <strong>Email Not Verified</strong><br>
-            Please check your inbox/spam.
-        </div>
-        <div style="font-size:13px; text-align:center; margin-bottom:10px; color:var(--text-muted);" id="pendingEmail"></div>
-        <button id="resendBtn" class="primary">📩 Resend Email</button>
-        <button id="logoutBtn1" class="outline">Logout</button>
-    </div>
-
-    <!-- PROFILE (Logged In & Verified) -->
-    <div id="userProfile" style="display:none; text-align:center;">
-        <div style="color:var(--accent); font-weight:bold; margin-bottom:10px; word-break:break-all;" id="displayEmail"></div>
-        <button id="logoutBtn" style="background:var(--danger)">Logout</button>
-    </div>
-  </div>
-
-  <!-- LOCKED CONTENT (Not Logged In) -->
-  <div id="lockedContent" class="card">
-    <div class="locked-msg">
-        🔒 <strong>Restricted Access</strong><br>
-        Login & Verify Email to Play.
-    </div>
-  </div>
-
-  <!-- LOCKED CONTENT (Logged In but NOT Verified) -->
-  <div id="verifyLockedContent" class="card" style="display:none;">
-    <div class="verify-msg">
-        🚫 <strong>Access Pending</strong><br>
-        Verify email to unlock games.
-    </div>
-  </div>
-
-  <!-- UNLOCKED CONTENT -->
-  <div id="unlockedContent" style="display:none">
-    <div class="card">
-      <h3>🌍 Play Online</h3>
-      <button onclick="window.openGame('chess8x8.html')">Chess 8×8</button>
-      <button onclick="window.openGame('chess9x9.html')">Chess 9×9</button>
-    </div>
-
-    <div class="card">
-      <h3>🤖 vs Computer</h3>
-      <button onclick="window.openGame('SuperChess8x8.html')">SuperChess8x8</button>
-      <button onclick="window.openGame('SuperChess9x9.html')">SuperChess9x9</button>
-    </div>
-  </div>
-</aside>
-
-<main class="main-content">
-    <div id="heroMsg" style="text-align:center; padding:10px;">
-        <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9</h1>
-        <p style="color:var(--text-muted); font-size:13px;">Secure verification required to play.</p>
         
-        <div class="warning-box">
-            <strong>⚠️ Important:</strong><br>
-            If verification link doesn't work, ensure this site is hosted online.
+        <div class="input-group">
+          <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+          <span class="toggle-password" onclick="window.togglePasswordVisibility()">👁️</span>
         </div>
+
+        <button type="submit" id="loginBtn" class="btn btn-primary">
+          <span class="btn-text">Login</span>
+        </button>
+        
+        <button type="button" id="signupBtn" class="btn btn-secondary">
+          Create Account
+        </button>
+
+        <button type="button" id="forgotBtn" class="btn" style="color:var(--text-muted); font-size:12px; margin-top:5px;">
+          Forgot Password?
+        </button>
+      </form>
     </div>
 
-    <div id="gameSection">
-        <div class="game-loading" id="gameLoading" style="display:none;">
-            <div class="spinner"></div>
-        </div>
-        <iframe id="gameFrame" loading="lazy"></iframe>
+    <!-- 2. PROFILE: UNVERIFIED -->
+    <div id="unverifiedSection" class="card" style="display: none;">
+      <div class="card-title">⚠️ Action Required</div>
+      
+      <div class="status-box status-warning">
+        <strong>Email not verified.</strong><br>
+        We sent a link to your inbox. Click it to auto-login.
+      </div>
+      
+      <div style="font-size:13px; color:var(--text-muted); margin-bottom:15px; text-align:center; word-break:break-all;" id="pendingEmailDisplay">
+        user@example.com
+      </div>
+
+      <button id="resendBtn" class="btn btn-primary">
+        📩 Resend Email
+      </button>
+      <button id="logoutUnverifiedBtn" class="btn btn-secondary">
+        Sign Out
+      </button>
     </div>
-</main>
+
+    <!-- 3. PROFILE: VERIFIED -->
+    <div id="profileSection" class="card" style="display: none;">
+      <div class="card-title">✅ Player Profile</div>
+      
+      <div style="text-align:center; margin-bottom:15px;">
+        <div style="font-size:24px; font-weight:bold; color:var(--primary); margin-bottom:4px;">Grandmaster</div>
+        <div style="font-size:13px; color:var(--text-muted); word-break:break-all;" id="userEmailDisplay"></div>
+      </div>
+
+      <div class="status-box status-success">
+        Access Granted. You can play.
+      </div>
+
+      <button id="logoutBtn" class="btn btn-danger">
+        Log Out
+      </button>
+    </div>
+
+    <!-- GAME MENU (Separated Sections) -->
+    <div id="gameMenu" style="display:none; margin-top: auto;">
+      
+      <!-- Section 1: Play Online With Friend -->
+      <div class="game-section">
+        <div class="card-title">👥 Play Online (With Friend)</div>
+        <div class="game-grid">
+          <div class="game-btn" onclick="window.loadGame('chess8x8.html')">
+            <strong>Chess 8x8</strong>
+            <small>Classic Rules</small>
+          </div>
+          <div class="game-btn" onclick="window.loadGame('chess9x9.html')">
+            <strong>Chess 9x9</strong>
+            <small>Expanded Board</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: vs Computer AI -->
+      <div class="game-section">
+        <div class="card-title">🤖 vs Computer AI</div>
+        <div class="game-grid">
+          <div class="game-btn" onclick="window.loadGame('SuperChess8x8.html')">
+            <strong>SuperChess 8x8</strong>
+            <small>AI Opponent</small>
+          </div>
+          <div class="game-btn" onclick="window.loadGame('SuperChess9x9.html')">
+            <strong>SuperChess 9x9</strong>
+            <small>AI Opponent</small>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+    
+    <div id="heroSection" class="hero-placeholder">
+      <div class="hero-icon">♟️</div>
+      <h1 style="font-size: 24px; margin-bottom: 10px; color:white;">Welcome to TheGrandChess9</h1>
+      <p style="color: var(--text-muted); line-height: 1.6;">
+        Secure login required. Create an account, verify email, and play.
+      </p>
+    </div>
+
+    <div id="gameContainer" class="game-frame-wrapper">
+      <div class="loading-overlay" id="gameLoader" style="display:none;">
+        <div class="spinner" style="width:30px; height:30px; border-color:white; border-bottom-color:transparent;"></div>
+      </div>
+      <iframe id="gameFrame" allowfullscreen></iframe>
+    </div>
+
+  </main>
 </div>
 
+<!-- Firebase SDKs -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-signOut, sendPasswordResetEmail, onAuthStateChanged, sendEmailVerification, applyActionCode } from
-"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword,
+    signOut, 
+    sendPasswordResetEmail, 
+    onAuthStateChanged, 
+    sendEmailVerification, 
+    applyActionCode,
+    signInWithEmailLink,
+    isSignInWithEmailLink 
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// Check for mobile and reduce operations
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-if (window.location.protocol === 'file:') {
-    console.error("Firebase Auth requires HTTPS or localhost. File protocol is not supported for email verification.");
-    alert("⚠️ WARNING: You are opening this file directly from your computer.\n\nEmail Verification Links will NOT work.\n\nPlease host this file on Netlify, Vercel, or GitHub Pages.");
-}
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAszg47yTdrGvq7Tr5xnuyx0qnj8SmAgL0",
-  authDomain: "thegrandchess9-2869e.firebaseapp.com",
-  projectId: "thegrandchess9-2869e",
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Cache DOM elements
-const elements = {
-  email: document.getElementById("email"),
-  password: document.getElementById("password"),
-  passwordToggle: document.getElementById("passwordToggle"),
-  loginBtn: document.getElementById("loginBtn"),
-  signupBtn: document.getElementById("signupBtn"),
-  logoutBtn: document.getElementById("logoutBtn"),
-  logoutBtn1: document.getElementById("logoutBtn1"),
-  resendBtn: document.getElementById("resendBtn"),
-  forgotBtn: document.getElementById("forgotBtn"),
-  authForm: document.getElementById("authForm"),
-  verifyProfile: document.getElementById("verifyProfile"),
-  userProfile: document.getElementById("userProfile"),
-  pendingEmail: document.getElementById("pendingEmail"),
-  displayEmail: document.getElementById("displayEmail"),
-  lockedContent: document.getElementById("lockedContent"),
-  verifyLockedContent: document.getElementById("verifyLockedContent"),
-  unlockedContent: document.getElementById("unlockedContent"),
-  toast: document.getElementById('toast'),
-  heroMsg: document.getElementById('heroMsg'),
-  gameSection: document.getElementById('gameSection'),
-  gameLoading: document.getElementById('gameLoading'),
-  gameFrame: document.getElementById('gameFrame')
-};
-
-// Password visibility toggle
-elements.passwordToggle.addEventListener('click', function() {
-    const type = elements.password.getAttribute('type') === 'password' ? 'text' : 'password';
-    elements.password.setAttribute('type', type);
-    this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
-});
-
-// Debounce function for performance
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+  const firebaseConfig = {
+    apiKey: "AIzaSyAszg47yTdrGvq7Tr5xnuyx0qnj8SmAgL0",
+    authDomain: "thegrandchess9-2869e.firebaseapp.com",
+    projectId: "thegrandchess9-2869e",
   };
-}
 
-// Optimized toast notification
-const showToast = debounce((msg, type='info') => {
-    elements.toast.innerText = msg;
-    elements.toast.style.borderLeftColor = type === 'error' ? '#e94560' : '#22c55e';
-    elements.toast.classList.add('show');
-    setTimeout(() => elements.toast.classList.remove('show'), 3000);
-}, 100);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-// Check if the URL contains an action code (for email verification)
-function handleEmailVerification() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    const actionCode = urlParams.get('oobCode');
+  const UI = {
+    authSection: document.getElementById('authSection'),
+    unverifiedSection: document.getElementById('unverifiedSection'),
+    profileSection: document.getElementById('profileSection'),
+    gameMenu: document.getElementById('gameMenu'),
+    heroSection: document.getElementById('heroSection'),
+    gameContainer: document.getElementById('gameContainer'),
     
-    if (mode === 'verifyEmail' && actionCode) {
-        applyActionCode(auth, actionCode)
-        .then(() => {
-            showToast("Email verified! You can now login.", 'success');
-            window.history.replaceState({}, document.title, window.location.pathname);
-        })
-        .catch((error) => {
-            showToast("Error: " + error.message, 'error');
-            console.error("Error applying action code:", error);
-        });
-    }
-}
+    emailInput: document.getElementById('email'),
+    passInput: document.getElementById('password'),
+    
+    loginBtn: document.getElementById('loginBtn'),
+    signupBtn: document.getElementById('signupBtn'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    logoutUnverifiedBtn: document.getElementById('logoutUnverifiedBtn'),
+    resendBtn: document.getElementById('resendBtn'),
+    
+    pendingEmail: document.getElementById('pendingEmailDisplay'),
+    userEmail: document.getElementById('userEmailDisplay'),
+    
+    gameFrame: document.getElementById('gameFrame'),
+    gameLoader: document.getElementById('gameLoader'),
+    
+    toast: document.getElementById('toast'),
+    toastIcon: document.getElementById('toast-icon'),
+    toastMsg: document.getElementById('toast-msg'),
+    status: document.getElementById('connectionStatus')
+  };
 
-// Call this function on page load
-handleEmailVerification();
+  function showToast(message, type = 'info') {
+    UI.toastMsg.innerText = message;
+    UI.toast.className = ''; 
+    UI.toast.classList.add(type);
+    UI.toast.classList.add('show');
+    
+    let icon = 'ℹ️';
+    if(type === 'success') icon = '✅';
+    if(type === 'error') icon = '❌';
+    UI.toastIcon.innerText = icon;
 
-// SIGN UP LOGIC
-elements.signupBtn.onclick = () => {
-  const email = elements.email.value.trim();
-  const pass = elements.password.value.trim();
-  if(!email || !pass) return showToast("Please fill all fields", 'error');
-
-  // Password validation
-  if(pass.length < 6) {
-    return showToast("Password must be at least 6 characters", 'error');
+    setTimeout(() => {
+      UI.toast.classList.remove('show');
+    }, 4000);
   }
 
-  createUserWithEmailAndPassword(auth, email, pass)
-  .then(({user}) => {
-    const actionCodeSettings = {
-      url: window.location.origin + window.location.pathname,
-      handleCodeInApp: true 
-    };
-
-    sendEmailVerification(user, actionCodeSettings)
-    .then(() => {
-        showToast("Verification email sent! Please check your inbox.", 'success');
-        if (!isMobile) {
-            alert("EMAIL SENT!\n\nPlease check your inbox or Spam folder.\n\nAfter verifying, you can login to play.");
-        }
-        // Clear form fields
-        elements.email.value = '';
-        elements.password.value = '';
-        signOut(auth); 
-    })
-    .catch((err) => {
-        console.error(err);
-        showToast("Error: " + err.message, 'error');
-    });
-  })
-  .catch(err => {
-    // Provide more specific error messages
-    let errorMessage = err.message;
-    if(err.code === 'auth/email-already-in-use') {
-      errorMessage = "This email is already registered. Please login or use a different email.";
-    } else if(err.code === 'auth/weak-password') {
-      errorMessage = "Password is too weak. Please use a stronger password.";
-    }
-    showToast(errorMessage, 'error');
-  });
-}
-
-// LOGIN LOGIC
-elements.loginBtn.onclick = () => {
-  if(!elements.email.value || !elements.password.value) return showToast("Enter details", 'error');
-  
-  signInWithEmailAndPassword(auth, elements.email.value, elements.password.value)
-  .then(async ({user}) => {
-    await user.reload(); 
-    
-    if(user.emailVerified){
-        updateUI(user);
-        showToast("Logged in successfully!", 'success');
-        // Clear form fields
-        elements.email.value = '';
-        elements.password.value = '';
+  function setBtnLoading(btn, isLoading, defaultText) {
+    if (isLoading) {
+      btn.disabled = true;
+      btn.innerHTML = `<div class="spinner"></div> Processing...`;
     } else {
-        showToast("Please verify your email first.", 'error');
-        updateUI(user);
+      btn.disabled = false;
+      btn.innerHTML = `<span class="btn-text">${defaultText}</span>`;
     }
-  })
-  .catch(err => {
-    // Provide more specific error messages
-    let errorMessage = err.message;
-    if(err.code === 'auth/user-not-found') {
-      errorMessage = "User not found. Please check your email or sign up.";
-    } else if(err.code === 'auth/wrong-password') {
-      errorMessage = "Incorrect password. Please try again.";
+  }
+
+  // --- AUTO-LOGIN SYSTEM ---
+  async function checkEmailVerification() {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      showToast('Verifying email & logging you in...', 'info');
+      UI.status.innerText = '● Verifying...';
+      UI.status.style.color = '#eab308';
+
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        email = UI.emailInput.value;
+      }
+
+      if (!email) {
+        showToast('Error: Email missing. Please try again.', 'error');
+        window.location.href = window.location.pathname;
+        return;
+      }
+
+      try {
+        const result = await signInWithEmailLink(auth, email, window.location.href);
+        window.localStorage.removeItem('emailForSignIn');
+        showToast('Email Verified! Logged in successfully.', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (error) {
+        console.error(error);
+        showToast('Auto-login failed: ' + error.message, 'error');
+        window.location.href = window.location.pathname;
+      }
     }
-    showToast(errorMessage, 'error');
-  });
-}
+  }
 
-// LOGOUT
-elements.logoutBtn.onclick = () => signOut(auth).then(()=>{ 
-    updateUI(null); 
-    showToast("Logged out", 'info');
-    // Reset game view
-    elements.heroMsg.style.display = 'block';
-    elements.gameSection.style.display = 'none';
-    elements.gameFrame.src = '';
-});
+  // --- AUTH LOGIC ---
 
-elements.logoutBtn1.onclick = () => signOut(auth).then(()=>{ 
-    updateUI(null); 
-    showToast("Logged out", 'info');
-});
+  UI.signupBtn.addEventListener('click', () => {
+    const email = UI.emailInput.value.trim();
+    const password = UI.passInput.value.trim();
 
-// RESEND VERIFICATION
-elements.resendBtn.onclick = () => {
-    const user = auth.currentUser;
-    if(user && !user.emailVerified){
+    if (!email || !password) return showToast('Please fill all fields.', 'error');
+    if (password.length < 6) return showToast('Password must be 6+ chars.', 'error');
+
+    setBtnLoading(UI.signupBtn, true, 'Create Account');
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        window.localStorage.setItem('emailForSignIn', email);
+
         const actionCodeSettings = {
-            url: window.location.origin + window.location.pathname,
-            handleCodeInApp: true
+          url: window.location.href,
+          handleCodeInApp: true
         };
+
         sendEmailVerification(user, actionCodeSettings)
-        .then(() => showToast("Verification email resent!", 'success'))
+          .then(() => {
+            showToast('Account created! Check email to verify.', 'success');
+            signOut(auth); 
+            setBtnLoading(UI.signupBtn, false, 'Create Account');
+          })
+          .catch((err) => {
+            showToast('Error: ' + err.message, 'error');
+            setBtnLoading(UI.signupBtn, false, 'Create Account');
+          });
+      })
+      .catch((error) => {
+        let msg = error.message;
+        if(error.code === 'auth/email-already-in-use') msg = 'Email already in use.';
+        showToast(msg, 'error');
+        setBtnLoading(UI.signupBtn, false, 'Create Account');
+      });
+  });
+
+  UI.loginBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const email = UI.emailInput.value.trim();
+    const password = UI.passInput.value.trim();
+
+    if (!email || !password) return showToast('Enter email & password.', 'error');
+    setBtnLoading(UI.loginBtn, true, 'Login');
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        await userCredential.user.reload();
+        const user = userCredential.user;
+        
+        if (user.emailVerified) {
+          showToast('Welcome back!', 'success');
+        } else {
+          showToast('Please verify your email to play.', 'info');
+        }
+        updateUI(user);
+        setBtnLoading(UI.loginBtn, false, 'Login');
+      })
+      .catch((error) => {
+        let msg = error.message;
+        if(error.code === 'auth/invalid-credential') msg = 'Invalid email or password.';
+        showToast(msg, 'error');
+        setBtnLoading(UI.loginBtn, false, 'Login');
+      });
+  });
+
+  function handleLogout() {
+    signOut(auth).then(() => {
+      showToast('Logged out.', 'info');
+      UI.gameFrame.src = '';
+      UI.gameContainer.style.display = 'none';
+      UI.heroSection.style.display = 'block';
+    });
+  }
+  UI.logoutBtn.addEventListener('click', handleLogout);
+  UI.logoutUnverifiedBtn.addEventListener('click', handleLogout);
+
+  UI.resendBtn.addEventListener('click', () => {
+    const user = auth.currentUser;
+    if(user){
+      window.localStorage.setItem('emailForSignIn', user.email);
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+      sendEmailVerification(user, actionCodeSettings)
+        .then(() => showToast('Verification email sent again.', 'success'))
         .catch(err => showToast(err.message, 'error'));
     }
-}
+  });
 
-// FORGOT PASSWORD
-elements.forgotBtn.onclick = () => {
-    if(!elements.email.value) return showToast("Enter email first", 'error');
-    sendPasswordResetEmail(auth, elements.email.value)
-    .then(()=>showToast("Reset email sent!", 'success'))
-    .catch(err=>showToast(err.message, 'error'));
-}
-
-// UI STATE MANAGER - Optimized
-function updateUI(user){
-    // Hide all first
-    elements.authForm.style.display = 'none';
-    elements.userProfile.style.display = 'none';
-    elements.verifyProfile.style.display = 'none';
-    elements.lockedContent.style.display = 'none';
-    elements.verifyLockedContent.style.display = 'none';
-    elements.unlockedContent.style.display = 'none';
+  // --- UI STATE MANAGER ---
+  function updateUI(user) {
+    UI.authSection.style.display = 'none';
+    UI.unverifiedSection.style.display = 'none';
+    UI.profileSection.style.display = 'none';
+    UI.gameMenu.style.display = 'none';
 
     if (user) {
-        if (user.emailVerified) {
-            elements.userProfile.style.display = 'block';
-            elements.displayEmail.innerText = user.email;
-            elements.unlockedContent.style.display = 'block';
-        } else {
-            elements.verifyProfile.style.display = 'block';
-            elements.pendingEmail.innerText = user.email;
-            elements.verifyLockedContent.style.display = 'block';
-        }
+      if (user.emailVerified) {
+        UI.profileSection.style.display = 'block';
+        UI.gameMenu.style.display = 'block';
+        UI.userEmail.innerText = user.email;
+        UI.status.innerText = '● Online';
+        UI.status.style.color = 'var(--primary)';
+      } else {
+        UI.unverifiedSection.style.display = 'block';
+        UI.pendingEmail.innerText = user.email;
+        UI.status.innerText = '● Pending Verification';
+        UI.status.style.color = '#eab308';
+      }
     } else {
-        elements.authForm.style.display = 'block';
-        elements.lockedContent.style.display = 'block';
+      UI.authSection.style.display = 'block';
+      UI.heroSection.style.display = 'block';
+      UI.gameContainer.style.display = 'none';
+      UI.status.innerText = '● System Ready';
+      UI.status.style.color = 'var(--text-muted)';
     }
-}
+  }
 
-// AUTH STATE LISTENER - Optimized
-let authStateTimer;
-onAuthStateChanged(auth, (user) => {
-    // Clear previous timer
-    if (authStateTimer) clearTimeout(authStateTimer);
-    
-    // Debounce auth state changes
-    authStateTimer = setTimeout(() => {
-        if(user){
-            user.reload().then(() => {
-                updateUI(user);
-            });
-        } else { 
-            updateUI(null); 
-        }
-    }, isMobile ? 300 : 100); // Longer delay on mobile
-});
+  onAuthStateChanged(auth, (user) => {
+    updateUI(user);
+  });
 
-// Make the openGame function globally accessible - Optimized
-window.openGame = function(url) {
+  // --- INIT ---
+  checkEmailVerification();
+
+  window.loadGame = function(url) {
     const user = auth.currentUser;
+    if (!user) return showToast('Please login first.', 'error');
+    if (!user.emailVerified) return showToast('Please verify your email.', 'error');
+
+    UI.heroSection.style.display = 'none';
+    UI.gameContainer.style.display = 'flex';
+    UI.gameLoader.style.display = 'flex';
+    UI.gameFrame.src = '';
     
-    if (!user) {
-        showToast("Please login first", 'error');
-        return;
-    }
-    
-    if (!user.emailVerified) {
-        showToast("Please verify your email first", 'error');
-        return;
-    }
-    
-    // Hide hero, show game section
-    elements.heroMsg.style.display = 'none';
-    elements.gameSection.style.display = 'block';
-    elements.gameLoading.style.display = 'flex';
-    
-    // Clear previous game
-    elements.gameFrame.src = 'about:blank';
-    
-    // Load new game with delay for better UX
     setTimeout(() => {
-        elements.gameFrame.onload = function() {
-            elements.gameLoading.style.display = 'none';
-        };
-        
-        elements.gameFrame.onerror = function() {
-            elements.gameLoading.style.display = 'none';
-            showToast("Failed to load game", 'error');
-        };
-        
-        elements.gameFrame.src = url;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
-};
+      UI.gameFrame.src = url;
+      UI.gameFrame.onload = () => { UI.gameLoader.style.display = 'none'; };
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 500);
+  };
 
-// Clean up on page unload
-window.addEventListener('beforeunload', () => {
-    if (elements.gameFrame) {
-        elements.gameFrame.src = 'about:blank';
-    }
-});
+  window.togglePasswordVisibility = function() {
+    const type = UI.passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    UI.passInput.setAttribute('type', type);
+  };
 
-// Performance monitoring
-if (window.performance && window.performance.memory) {
-    setInterval(() => {
-        if (window.performance.memory.usedJSHeapSize > 50000000) { // 50MB
-            console.warn('High memory usage detected');
-            // Force garbage collection if available
-            if (window.gc) window.gc();
-        }
-    }, 30000);
-}
 </script>
-
 </body>
 </html>
