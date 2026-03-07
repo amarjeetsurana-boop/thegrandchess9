@@ -302,18 +302,20 @@ img.piece{
 
 <!-- Rules Modal -->
 <div id="infoModal" class="modal">
-  <div class="modal-card" style="width:90%; max-width:600px; align-items:stretch;">
+  <div class="modal-card" style="width:95%; max-width:900px; align-items:stretch;">
+    
     <h2 style="margin-top:0; text-align:center;">⚔️ Rules</h2>
-    <div style="max-height:40vh; overflow-y:auto; padding-right:10px; line-height:1.6;">
-      <p><strong>Setup Phase:</strong><br>
-        1. White places 2 extra pawns on Rank 3.<br>
-        2. Black places 2 extra pawns on Rank 7.<br>
-        3. Then main game starts.
-      </p>
-      <p><strong>Charioteer (c):</strong> Must stay adjacent to its own king and cannot be captured.</p>
-      <p><strong>Sceptre (s):</strong> Moves like bishop + rook + knight.</p>
-    </div>
-    <button id="closeRulesBtn" style="background:#e74c3c; color:white; border:none; padding:10px 20px; font-weight:bold; cursor:pointer; border-radius:5px;">Close Rules</button>
+
+    <!-- बड़ा rules board -->
+    <iframe src="rules.html"
+      style="width:100%; height:70vh; border:none; background:white;">
+    </iframe>
+
+    <button id="closeRulesBtn"
+      style="background:#e74c3c; color:white; border:none; padding:12px 25px; font-weight:bold; cursor:pointer; border-radius:6px;">
+      Close Rules
+    </button>
+
   </div>
 </div>
 
@@ -751,21 +753,37 @@ function generatePseudoMoves(r,c){
   const p=board[r][c]; if(!p) return [];
   const moves=[], color=p.c, dir=color==='w'?-1:1;
   function pushMove(toR,toC,special=null){
-    if(!inside(toR,toC)) return;
-    const target=board[toR][toC];
-    if(target && target.t==='c') return;
-    if(target && target.c===color) return;
-    if(p.t==='c'){
-      if(!target){
-        const kingPos=findKing(color);
-        if(kingPos && isAdjacent([toR,toC],kingPos))
-          moves.push({from:[r,c],to:[toR,toC],piece:{...p},captured:null,special});
+  if(!inside(toR,toC)) return;
+
+  const target = board[toR][toC];
+
+  if(target && target.t === 'c') return;
+  if(target && target.c === color) return;
+
+  if(p.t === 'c'){
+    if(!target){
+      const kingPos = findKing(color);
+      if(kingPos && isAdjacent([toR,toC], kingPos)){
+        moves.push({
+          from:[r,c],
+          to:[toR,toC],
+          piece:{...p},
+          captured:null,
+          special
+        });
       }
-      return;
     }
-    moves.push({from:[r,c],to:[toR,toC],piece:{...p},captured:target?{...target}:null,special});
+    return;
   }
 
+  moves.push({
+    from:[r,c],
+    to:[toR,toC],
+    piece:{...p},
+    captured: target ? {...target} : null,
+    special
+  });
+}
   if(p.t==='p'){
     const oneR=r+dir;
     if(inside(oneR,c)&&!board[oneR][c]){
