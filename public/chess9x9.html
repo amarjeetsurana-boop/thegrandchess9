@@ -295,6 +295,7 @@ img.piece{
 </style>
 </head>
 <body>
+<audio id="moveSound" src="move.mp3"></audio>
 
 <div class="header">
   <span>TheGrandChess9</span>
@@ -691,18 +692,18 @@ function onSquareClick(renderR,renderC){
 
 function finalizeMove(move){
   applyMove(move);
-  selected=null; legalMovesCache=[]; pendingPromotion=null;
+
+  let s = document.getElementById("moveSound");
+  s.currentTime = 0;
+  s.play();   // 🔊 sound play
+
+  selected=null;
+  legalMovesCache=[];
+  pendingPromotion=null;
+
   checkCharioteerNeeded();
   render();
   sendMove({type:'move',move});
-}
-
-function setupPromoModal(color){
-  promoModal.querySelectorAll('img').forEach(img=>{
-    const kind = img.parentElement.dataset.piece;
-    img.src = 'img/'+PIECE_IMG[color][kind];
-  });
-  promoModal.style.display='flex';
 }
 
 function handleIncomingPawnPlace(data){
