@@ -290,7 +290,9 @@ button.secondary{ background:#7f8c8d; }
 </style>
 </head>
 <body>
-  <div class="app">
+<audio id="moveSound" src="move.mp3"></audio>
+
+ <div class="app">
     <div class="board-wrap">
 
       <!-- 👇 Multiplayer Room सबसे ऊपर -->
@@ -354,12 +356,38 @@ button.secondary{ background:#7f8c8d; }
     </div>
   </div>
 
-
-
-
-
 <script>
+
+function playMoveSound() {
+  var sound = document.getElementById("moveSound");
+  sound.currentTime = 0;
+  sound.play();
+}
+
 const socket = io();
+
+// 🔥 Tournament Auto Room Join
+const params = new URLSearchParams(window.location.search);
+const tournamentRoom = params.get("room");
+
+if(tournamentRoom){
+
+  roomId = tournamentRoom;
+
+  document.getElementById("roomId").value = roomId;
+
+  socket.emit("joinRoom", roomId);
+
+  document.getElementById("roomInfo").style.display="flex";
+
+  document.getElementById("p1").textContent="Tournament Player";
+  document.getElementById("p2").textContent="Opponent";
+
+  gameReady = true;
+
+  statusEl.textContent="Tournament Match Started";
+
+}
 const UNICODE = {
   w: { k:'♔', q:'♕', r:'♖', b:'♗', n:'♘', p:'♙' },
   b: { k:'♚', q:'♛', r:'♜', b:'♝', n:'♞', p:'♟' },
@@ -609,6 +637,8 @@ function generatePseudoMoves(r,c){
 function applyMove(move){
   makeMoveOnBoard(move);
 
+  playMoveSound(); // 🔊 👈 यही line add करनी है
+
   // 🔥 CLEAR SELECTION & HIGHLIGHTS
   selected = null;
   legalMovesCache = [];
@@ -714,6 +744,34 @@ function joinRoom(){
 
 socket.on('roomCreated', () => { gameReady = true; });
 socket.on('playerJoined', () => { 
+
+// 🔥 Server se Tournament Match Start
+socket.on("start_match",(data)=>{
+
+  roomId = data.room;
+  myColor = data.color;
+
+  document.getElementById("roomId").value = roomId;
+
+  socket.emit("joinRoom",roomId);
+
+  document.getElementById("roomInfo").style.display="flex";
+
+  if(myColor === "white"){
+    myColor = "w";
+    document.getElementById("p1").textContent="You (White)";
+    document.getElementById("p2").textContent="Opponent";
+  }else{
+    myColor = "b";
+    document.getElementById("p1").textContent="Opponent";
+    document.getElementById("p2").textContent="You (Black)";
+  }
+
+  gameReady = true;
+
+  statusEl.textContent="Tournament Game Started";
+
+});
   const p2 = document.getElementById('p2');
   if(p2) p2.textContent = 'Opponent Ready!'; 
 });
@@ -764,8 +822,12 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
 document.getElementById('flipBtn').addEventListener('click', ()=>{
   flipped = !flipped; render();
 });
-
+// 🔥 Tournament Mode UI Fix
+if(tournamentRoom){
+  document.getElementById("roomSection").style.display="none";
+}
 render();
 </script>
+
 </body>
 </html>
