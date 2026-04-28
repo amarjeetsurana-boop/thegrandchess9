@@ -167,7 +167,7 @@ button.outline:hover { border-color:white; color:white; }
 /* Game Section - Performance Optimized */
 #gameSection { 
   display:none; 
-  height: 70vh; /* Reduced for mobile */
+  height: 140vh; /* Reduced for mobile */
   width: 100%; 
   margin-bottom:16px; 
   margin-top: 10px;
@@ -280,7 +280,7 @@ iframe{
 @media (max-width: 768px) {
     .sidebar { padding: 12px; }
     .main-content { padding: 12px; }
-    #gameSection { height: 60vh; }
+    #gameSection { height: 100vh; }
     .brand { font-size: 16px; }
     .brand-logo { width: 40px; height: 40px; }
 }
@@ -339,6 +339,11 @@ iframe{
         <button id="logoutBtn" style="background:var(--danger)">Logout</button>
     </div>
   </div>
+
+<div class="verify-msg">
+  📧 Verification email sent.<br>
+  Please check <b>Inbox</b> or <b>Spam</b> folder.
+</div>
 
   <!-- LOCKED CONTENT (Not Logged In) -->
   <div id="lockedContent" class="card">
