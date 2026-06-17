@@ -58,16 +58,20 @@ body{
 }
 
 /* ===== CHESSBOARD ===== */
+/* ===== CHESSBOARD (UPDATED FIX) ===== */
 .chessboard{
   display:grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
 
-  width: 100%; /* FIX: Fully responsive */
-  aspect-ratio:1/1;
+  width: 100%; 
   max-width: 100%;
+  aspect-ratio:1/1;
+  
+  /* 🔥 FIX: Yeh padding aur border ko board ke andar hi rakhega, jisse right side ke ghar nahi katenge */
+  box-sizing: border-box; 
 
-  gap:4px; /* Reduced gap for cleaner look on small screens */
+  gap:2px; /* Fixed: Mobile screen par spaces bachane ke liye gap thoda kam kiya */
   padding:4px;
 
   background:#222;
@@ -78,19 +82,20 @@ body{
   margin:0 auto;
 }
 
-/* ===== SQUARE ===== */
+/* ===== SQUARE (UPDATED FIX) ===== */
 .square{
   display:flex;
   align-items:center;
   justify-content:center;
 
-  /* FIX: Responsive font size for pieces */
-  font-size: min(8vw, 45px); 
+  /* 🔥 FIX: Pieces ka size thoda handle kiya taaki board mobile par right side stretch na ho */
+  font-size: min(7.5vw, 42px); 
   cursor:pointer;
   border-radius:4px;
 
   transition:0.1s;
 }
+
 .square.light{ background:var(--light); }
 .square.dark{ background:var(--dark); }
 
