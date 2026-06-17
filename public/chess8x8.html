@@ -6,6 +6,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1" />
 <script src="/socket.io/socket.io.js"></script>
 <style>
+
+* {
+  box-sizing: border-box;
+}
+
+
   :root{
   --light:#f0d9b5;
   --dark:#b58863;
@@ -56,15 +62,16 @@ body{
 /* ===== CHESSBOARD ===== */
 .chessboard{
   display:grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, 1fr); /* 8x8 standard chess ke liye 8 hi rahega */
   grid-template-rows: repeat(8, 1fr);
 
-  width: 100%; /* FIX: Fully responsive */
-  aspect-ratio:1/1;
+  width: 100%; 
   max-width: 100%;
+  aspect-ratio: 1 / 1; /* Board ko square rakhne ke liye */
+  box-sizing: border-box; /* FIX: padding ko andar rakhne ke liye takia ghar na katein */
 
-  gap:4px; /* Reduced gap for cleaner look on small screens */
-  padding:4px;
+  gap: 2px; /* Gap ko thoda kam kiya taaki screen par space bache */
+  padding: 4px;
 
   background:#222;
   border-radius:10px;
@@ -80,8 +87,8 @@ body{
   align-items:center;
   justify-content:center;
 
-  /* FIX: Responsive font size for pieces */
-  font-size: min(8vw, 45px); 
+  /* FIX: Font size ko thoda stable kiya taaki pieces bade hokar ghar ko screen se bahar na dhakelein */
+  font-size: min(7.5vw, 42px); 
   cursor:pointer;
   border-radius:4px;
 
