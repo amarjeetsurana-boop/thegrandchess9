@@ -83,25 +83,25 @@
   }
 
   /* board area with rank/file labels */
-.board-area{
-  display: grid;
-  grid-template-columns: 20px 1fr; /* ranks | board */
-  gap: 4px;
-  width: 100%;
-}
+  .board-area{
+    display: grid;
+    grid-template-columns: 20px 1fr; /* ranks | board */
+    gap: 4px;
+    width: 100%;
+  }
   /* rank labels (left) */
   .ranks{
-  display: grid;
-  grid-template-rows: repeat(8, 1fr);
-  font-weight:700;
-  font-size: clamp(10px, 2vw, 14px);
-  color:#ccc;
-}
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    font-weight:700;
+    font-size: clamp(10px, 2vw, 14px);
+    color:#ccc;
+  }
   .rank-label{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
 
   /* board grid */
   #board{
@@ -124,18 +124,7 @@
     display:flex; 
     align-items:center; 
     justify-content:center; 
-    
-    /* --- YAHAN CHANGE KAREIN --- */
-    /* Pehle: min(7vw, 55px) */
-    
-    /* Option 1: Thoda chhota (Recommended) */
     font-size: min(6vw, 45px); 
-    
-    /* Option 2: Bahut chhota agar zarurat ho */
-    /* font-size: min(5vw, 40px); */
-    
-    /* --------------------------- */
-    
     user-select:none; 
     cursor:pointer; 
     position:relative; 
@@ -281,6 +270,8 @@ class ChessGame {
   constructor(){ this.reset(); this.history = []; }
   reset(){
     this.turn="w"; this.enPassant=null; this.selected=null;
+    // Castling Rights Trackers
+    this.castlingRights = { w: { kingSide: true, queenSide: true }, b: { kingSide: true, queenSide: true } };
     this.board=[
       ["r","n","b","q","k","b","n","r"],
       ["p","p","p","p","p","p","p","p"],
@@ -299,7 +290,8 @@ class ChessGame {
     this.history.push({
       board: this.cloneBoard(),
       turn: this.turn,
-      enPassant: this.enPassant ? [...this.enPassant] : null
+      enPassant: this.enPassant ? [...this.enPassant] : null,
+      castlingRights: JSON.parse(JSON.stringify(this.castlingRights))
     });
     if(this.history.length>50) this.history.shift(); // Limit history
   }
@@ -309,6 +301,7 @@ class ChessGame {
     this.board = s.board.map(r=>r.slice());
     this.turn = s.turn;
     this.enPassant = s.enPassant;
+    this.castlingRights = s.castlingRights;
     return true;
   }
 
@@ -335,7 +328,37 @@ class ChessGame {
     const t=p.toLowerCase(); if(["b","r","q"].includes(t)){
       for(const [dr,dc] of dirs[t]){ let nr=r+dr,nc=c+dc; while(this.inBounds(nr,nc)){ if(!this.board[nr][nc]) moves.push([nr,nc]); else{ if(this.opp(p,this.board[nr][nc])) moves.push([nr,nc]); break;} nr+=dr; nc+=dc; } }
     }
-    if(t==="k"){ for(let dr=-1;dr<=1;dr++){ for(let dc=-1;dc<=1;dc++){ if(dr===0&&dc===0) continue; const nr=r+dr,nc=c+dc; if(this.inBounds(nr,nc)&&(!this.board[nr][nc]||this.opp(p,this.board[nr][nc]))) moves.push([nr,nc]); } } }
+    if(t==="k"){ 
+      for(let dr=-1;dr<=1;dr++){ 
+        for(let dc=-1;dc<=1;dc++){ 
+          if(dr===0&&dc===0) continue; 
+          const nr=r+dr,nc=c+dc; 
+          if(this.inBounds(nr,nc)&&(!this.board[nr][nc]||this.opp(p,this.board[nr][nc]))) moves.push([nr,nc]); 
+        } 
+      } 
+
+      // --- CASTLING VALIDATION MOVES ---
+      const color = isW ? 'w' : 'b';
+      const enemyColor = isW ? 'b' : 'w';
+      if (!this.isSquareAttacked(enemyColor, r, c)) {
+        // King Side (Short)
+        if (this.castlingRights[color].kingSide) {
+          if (!this.board[r][c+1] && !this.board[r][c+2]) {
+            if (!this.isSquareAttacked(enemyColor, r, c+1) && !this.isSquareAttacked(enemyColor, r, c+2)) {
+              moves.push([r, c+2]);
+            }
+          }
+        }
+        // Queen Side (Long)
+        if (this.castlingRights[color].queenSide) {
+          if (!this.board[r][c-1] && !this.board[r][c-2] && !this.board[r][c-3]) {
+            if (!this.isSquareAttacked(enemyColor, r, c-1) && !this.isSquareAttacked(enemyColor, r, c-2)) {
+              moves.push([r, c-2]);
+            }
+          }
+        }
+      }
+    }
     return moves;
   }
 
@@ -447,11 +470,42 @@ class ChessGame {
       this.board[capR][c2]="";
     }
 
+    // --- CASTLING MOVEMENT HANDLING ---
+    if (p.toLowerCase() === "k" && Math.abs(c2 - c1) === 2) {
+      if (c2 > c1) {
+        // King Side Castling
+        this.board[r1][c1+1] = this.board[r1][7];
+        this.board[r1][7] = "";
+      } else {
+        // Queen Side Castling
+        this.board[r1][c1-1] = this.board[r1][0];
+        this.board[r1][0] = "";
+      }
+    }
+
     this.enPassant=null;
     if(p.toLowerCase()==="p" && Math.abs(r2-r1)===2) this.enPassant=[(r1+r2)/2,c1];
 
     this.board[r2][c2]=p;
     this.board[r1][c1]="";
+
+    // --- UPDATE CASTLING RIGHTS PERMANENTLY ---
+    if (p === "K") {
+      this.castlingRights.w.kingSide = false;
+      this.castlingRights.w.queenSide = false;
+    } else if (p === "k") {
+      this.castlingRights.b.kingSide = false;
+      this.castlingRights.b.queenSide = false;
+    }
+    if (r1 === 7 && c1 === 7) this.castlingRights.w.kingSide = false;
+    if (r1 === 7 && c1 === 0) this.castlingRights.w.queenSide = false;
+    if (r1 === 0 && c1 === 7) this.castlingRights.b.kingSide = false;
+    if (r1 === 0 && c1 === 0) this.castlingRights.b.queenSide = false;
+
+    if (r2 === 7 && c2 === 7) this.castlingRights.w.kingSide = false;
+    if (r2 === 7 && c2 === 0) this.castlingRights.w.queenSide = false;
+    if (r2 === 0 && c2 === 7) this.castlingRights.b.kingSide = false;
+    if (r2 === 0 && c2 === 0) this.castlingRights.b.queenSide = false;
 
     // Promotion
     if((p==="P" && r2===0) || (p==="p" && r2===7)){
@@ -692,7 +746,7 @@ function render(){
       const dc = flipped ? 7-c : c;
 
       const sq = document.createElement("div");
-      sq.className = "square " + (((r+c)%2===0) ? "light" : "dark");
+      sq.className = "square " + (((dr+dc)%2===0) ? "light" : "dark");
       sq.dataset.r = dr; sq.dataset.c = dc;
       
       const p = game.board[dr][dc];
@@ -764,8 +818,6 @@ function aiMove(){
     const best = getBestMove();
     if(best){
       game.move(best.from, best.to);
-    } else {
-      // Checkmate/Stalemate logic handled in postMoveChecks
     }
     render();
     postMoveChecks();
