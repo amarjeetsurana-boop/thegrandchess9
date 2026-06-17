@@ -6,11 +6,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1" />
 <script src="/socket.io/socket.io.js"></script>
 <style>
-
+/* 👇 Universal Fix: Isse right side se koi bhi ghar ya panel nahi katega */
 * {
   box-sizing: border-box;
 }
-
 
   :root{
   --light:#f0d9b5;
@@ -33,7 +32,6 @@ body{
   justify-content:center;
   align-items:center; /* Center vertically if height permits */
   padding:10px; /* Reduced padding for small screens */
-  box-sizing:border-box;
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
@@ -62,16 +60,15 @@ body{
 /* ===== CHESSBOARD ===== */
 .chessboard{
   display:grid;
-  grid-template-columns: repeat(8, 1fr); /* 8x8 standard chess ke liye 8 hi rahega */
+  grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
 
-  width: 100%; 
+  width: 100%; /* FIX: Fully responsive */
+  aspect-ratio:1/1;
   max-width: 100%;
-  aspect-ratio: 1 / 1; /* Board ko square rakhne ke liye */
-  box-sizing: border-box; /* FIX: padding ko andar rakhne ke liye takia ghar na katein */
 
-  gap: 2px; /* Gap ko thoda kam kiya taaki screen par space bache */
-  padding: 4px;
+  gap:4px; /* Reduced gap for cleaner look on small screens */
+  padding:4px;
 
   background:#222;
   border-radius:10px;
@@ -87,8 +84,8 @@ body{
   align-items:center;
   justify-content:center;
 
-  /* FIX: Font size ko thoda stable kiya taaki pieces bade hokar ghar ko screen se bahar na dhakelein */
-  font-size: min(7.5vw, 42px); 
+  /* FIX: Responsive font size for pieces */
+  font-size: min(8vw, 45px); 
   cursor:pointer;
   border-radius:4px;
 
@@ -195,7 +192,6 @@ input{
   width: 100%;
   padding:10px;
   margin-bottom: 8px;
-  box-sizing: border-box;
   border-radius:6px;
   border:1px solid rgba(255,255,255,0.3);
   background:rgba(255,255,255,0.1);
@@ -607,9 +603,9 @@ function generatePseudoMoves(r,c){
       if(inside(tr,tc) && (!board[tr][tc] || board[tr][tc].c !== color)) pushMove(tr,tc);
     }
 
-    // 🏰 CASTLING PSEUDO MOVES LOGIC
+    // 🏰 CASTLING MOVES GENERATION
     if (!p.m && !isKingInCheck(color)) {
-      // King Side (Short Castling)
+      // King Side Castling
       const rRook = board[r][7];
       if (rRook && rRook.t === 'r' && rRook.c === color && !rRook.m) {
         if (!board[r][5] && !board[r][6]) {
@@ -618,7 +614,7 @@ function generatePseudoMoves(r,c){
           }
         }
       }
-      // Queen Side (Long Castling)
+      // Queen Side Castling
       const lRook = board[r][0];
       if (lRook && lRook.t === 'r' && lRook.c === color && !lRook.m) {
         if (!board[r][1] && !board[r][2] && !board[r][3]) {
@@ -653,7 +649,7 @@ function generatePseudoMoves(r,c){
   return moves;
 }
 
-// Castling square attack validation helper
+// Castling helper function to check enemy attacks
 function isSquareAttackedByEnemy(r, c, allyColor) {
   const enemy = allyColor === 'w' ? 'b' : 'w';
   for(let rr=0; rr<8; rr++){
@@ -672,7 +668,7 @@ function isSquareAttackedByEnemy(r, c, allyColor) {
 function applyMove(move){
   makeMoveOnBoard(move);
 
-  playMoveSound(); // 🔊 👈 यही line add करनी है
+  playMoveSound(); 
 
   // 🔥 CLEAR SELECTION & HIGHLIGHTS
   selected = null;
@@ -697,7 +693,7 @@ function makeMoveOnBoard(m){
     m.captured = board[tr][tc] ? {...board[tr][tc]} : null;
   }
 
-  // Handle Rook shift during castling execution
+  // Castling execution - Shift Rook
   if (m.special === 'kingside_castle') {
     const rook = board[fr][7];
     board[fr][5] = {...rook, m: true};
