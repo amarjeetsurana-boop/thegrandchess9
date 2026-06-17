@@ -295,18 +295,15 @@ button.secondary{ background:#7f8c8d; }
  <div class="app">
     <div class="board-wrap">
 
-      <!-- 👇 Multiplayer Room सबसे ऊपर -->
       <div class="room-section" id="roomSection">
         <h3>🎮 Multiplayer Room</h3>
         <input id="roomId" placeholder="Enter Room ID">
         
-        <!-- Create/Join buttons row -->
         <div class="controls">
           <button onclick="createRoom()">CREATE ROOM</button>
           <button onclick="joinRoom()">JOIN ROOM</button>
         </div>
 
-        <!-- 👇 Reset + Flip buttons -->
         <div class="controls">
           <button id="resetBtn" class="secondary">🔄 Reset</button>
           <button id="flipBtn" class="secondary">↻ Flip</button>
@@ -316,16 +313,13 @@ button.secondary{ background:#7f8c8d; }
 
 
 
-      <!-- 👇 Chessboard -->
       <div class="chessboard" id="chessboard"></div>
 
-      <!-- 👇 Player Info -->
       <div id="roomInfo" class="player-info" style="display:none;">
         <div>White: <span id="p1">Waiting...</span></div>
         <div>Black: <span id="p2">Waiting...</span></div>
       </div>
 
-      <!-- 👇 Right Panel (Status + Game Info) -->
       <div class="right-panel">
         <div class="status" id="status">Create Room to Start!</div>
 
@@ -342,11 +336,7 @@ button.secondary{ background:#7f8c8d; }
         </div>
       </div>
 
-    </div> <!-- board-wrap -->
-  </div> <!-- app -->
-
-  <!-- Promotion modal -->
-  <div id="promoModal" class="modal" style="display:none;">
+    </div> </div> <div id="promoModal" class="modal" style="display:none;">
     <div class="modal-card">
       <div style="font-weight:700; font-size:18px; margin-right:10px; color:gold;">Promote:</div>
       <div class="promo-piece" data-piece="q">♛</div>
@@ -434,9 +424,9 @@ function render(){
       const p = board[displayR][displayC];
       if(p){
         const span = document.createElement('span');
-span.textContent = UNICODE[p.c][p.t];
-span.className = 'piece ' + (p.c === 'w' ? 'white' : 'black');
-sq.appendChild(span);
+        span.textContent = UNICODE[p.c][p.t];
+        span.className = 'piece ' + (p.c === 'w' ? 'white' : 'black');
+        sq.appendChild(span);
         sq.title = p.c === 'w' ? 'White ' + pieceName(p.t) : 'Black ' + pieceName(p.t);
       }
       
@@ -609,6 +599,28 @@ function generatePseudoMoves(r,c){
       const tr=r+dr, tc=c+dc;
       if(inside(tr,tc) && (!board[tr][tc] || board[tr][tc].c !== color)) pushMove(tr,tc);
     }
+
+    // 🏰 CASTLING PSEUDO MOVES LOGIC
+    if (!p.m && !isKingInCheck(color)) {
+      // King Side (Short Castling)
+      const rRook = board[r][7];
+      if (rRook && rRook.t === 'r' && rRook.c === color && !rRook.m) {
+        if (!board[r][5] && !board[r][6]) {
+          if (!isSquareAttackedByEnemy(r, 5, color)) {
+            pushMove(r, 6, 'kingside_castle');
+          }
+        }
+      }
+      // Queen Side (Long Castling)
+      const lRook = board[r][0];
+      if (lRook && lRook.t === 'r' && lRook.c === color && !lRook.m) {
+        if (!board[r][1] && !board[r][2] && !board[r][3]) {
+          if (!isSquareAttackedByEnemy(r, 3, color)) {
+            pushMove(r, 2, 'queenside_castle');
+          }
+        }
+      }
+    }
   }
 
   const sliders = {
@@ -632,6 +644,22 @@ function generatePseudoMoves(r,c){
   }
 
   return moves;
+}
+
+// Castling square attack validation helper
+function isSquareAttackedByEnemy(r, c, allyColor) {
+  const enemy = allyColor === 'w' ? 'b' : 'w';
+  for(let rr=0; rr<8; rr++){
+    for(let cc=0; cc<8; cc++){
+      const p = board[rr][cc];
+      if(!p || p.c !== enemy) continue;
+      const pseudo = generatePseudoMoves(rr, cc);
+      for(const m of pseudo){
+        if(m.to[0] === r && m.to[1] === c) return true;
+      }
+    }
+  }
+  return false;
 }
 
 function applyMove(move){
@@ -660,6 +688,17 @@ function makeMoveOnBoard(m){
     board[capR][capC] = null;
   } else {
     m.captured = board[tr][tc] ? {...board[tr][tc]} : null;
+  }
+
+  // Handle Rook shift during castling execution
+  if (m.special === 'kingside_castle') {
+    const rook = board[fr][7];
+    board[fr][5] = {...rook, m: true};
+    board[fr][7] = null;
+  } else if (m.special === 'queenside_castle') {
+    const rook = board[fr][0];
+    board[fr][3] = {...rook, m: true};
+    board[fr][0] = null;
   }
 
   board[tr][tc] = {...piece, m:true};
