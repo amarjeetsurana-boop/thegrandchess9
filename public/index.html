@@ -89,7 +89,7 @@ header{
   letter-spacing:1px;
 }
 
-.locked-msg, .verify-msg {
+.locked-msg {
     text-align: center;
     padding: 15px;
     border: 1px dashed var(--text-muted);
@@ -97,27 +97,6 @@ header{
     color: var(--text-muted);
     font-size:13px;
 }
-
-.verify-msg {
-    background: rgba(34, 197, 94, 0.1);
-    border-color: var(--accent);
-    color: #bbf7d0;
-}
-
-input{ 
-  width:100%; 
-  padding:12px; 
-  border-radius:8px; 
-  border:1px solid var(--border); 
-  background:#020617; 
-  color:white; 
-  margin-bottom:10px; 
-  outline:none;
-  font-size:16px;
-  -webkit-appearance: none;
-}
-
-input:focus{border-color:var(--accent)}
 
 button{ 
   width:100%; 
@@ -136,8 +115,19 @@ button{
 
 button:hover{ background:#475569;}
 button:active{ transform: scale(0.98); }
-button.primary{ background:var(--accent); color:#052e16;}
-button.primary:hover{ background:var(--accent-hover);}
+
+button.google-btn {
+  background: #ffffff;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+}
+button.google-btn:hover {
+  background: #f8fafc;
+}
 
 .main-content{ 
   padding:16px; 
@@ -184,12 +174,6 @@ iframe{
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.warning-box { 
-  background: rgba(233, 69, 96, 0.1); 
-  border: 1px solid var(--danger); 
-  padding:12px; border-radius:8px; font-size:12px; color: #fca5a5; margin-top:10px;
-}
-
 #toast{
   position: fixed; top: calc(var(--header-height) + 10px); left: 50%;
   transform: translateX(-50%) translateZ(0);
@@ -229,36 +213,33 @@ iframe{
 <div class="app">
   <aside class="sidebar">
     <div class="card">
-      <h3>🌍 Instant Access</h3>
+      <h3>🔐 Access Gateway</h3>
       
+      <!-- GOOGLE FORM -->
       <div id="authForm">
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">No password required. Enter your email to get a direct login link.</p>
-          <input id="email" placeholder="Your Email Address" type="email" autocomplete="email">
-          <button id="loginBtn" class="primary">📩 Send Instant Login Link</button>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; text-align:center;">Sign in securely with your Google account to play instantly.</p>
+          <button id="googleLoginBtn" class="google-btn">
+              <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google Logo" style="width:18px;height:18px;">
+              Continue with Google
+          </button>
       </div>
 
-      <div id="verifyProfile" style="display:none;">
-          <div class="verify-msg" style="margin-bottom:10px;">
-              🚀 <strong>Magic Link Dispatched!</strong><br>
-              Check your email inbox or spam folder to log in instantly.
-          </div>
-          <div style="font-size:13px; text-align:center; margin-bottom:10px; color:var(--text-muted);" id="pendingEmail"></div>
-          <button id="resendBtn" class="primary">🔄 Resend Login Link</button>
-      </div>
-
+      <!-- PROFILE -->
       <div id="userProfile" style="display:none; text-align:center;">
           <div style="color:var(--accent); font-weight:bold; margin-bottom:10px; word-break:break-all;" id="displayEmail"></div>
-          <button id="logoutBtn" style="background:var(--danger)">Logout</button>
+          <button id="logoutBtn" style="background:var(--danger); color:white;">Logout</button>
       </div>
     </div>
 
+    <!-- LOCKED CONTENT -->
     <div id="lockedContent" class="card">
       <div class="locked-msg">
           🔒 <strong>Restricted Access</strong><br>
-          Click the link sent to your email to unlock all chess variants.
+          Please Sign In with Google to unlock games.
       </div>
     </div>
 
+    <!-- UNLOCKED CONTENT MENU -->
     <div id="unlockedContent" style="display:none">
       <div class="card" style="margin-bottom:12px;">
         <h3>🌍 Play Online</h3>
@@ -277,12 +258,7 @@ iframe{
   <main class="main-content">
       <div id="heroMsg" style="text-align:center; padding:10px;">
           <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9</h1>
-          <p style="color:var(--text-muted); font-size:13px;">Secure passwordless magic-link verification system.</p>
-          
-          <div class="warning-box">
-              <strong>⚠️ Important:</strong><br>
-              Make sure you open the login link on the same device/browser you used to request it.
-          </div>
+          <p style="color:var(--text-muted); font-size:13px;">1-Click fast verification system.</p>
       </div>
 
       <div id="gameSection">
@@ -294,10 +270,12 @@ iframe{
   </main>
 </div>
 
+<!-- ==========================================
+     FIREBASE 1-CLICK PERMANENT AUTH ENGINE
+     ========================================== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from
-"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
@@ -309,16 +287,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const elements = {
-  email: document.getElementById("email"),
-  loginBtn: document.getElementById("loginBtn"),
+  googleLoginBtn: document.getElementById("googleLoginBtn"),
   logoutBtn: document.getElementById("logoutBtn"),
-  resendBtn: document.getElementById("resendBtn"),
   authForm: document.getElementById("authForm"),
-  verifyProfile: document.getElementById("verifyProfile"),
   userProfile: document.getElementById("userProfile"),
-  pendingEmail: document.getElementById("pendingEmail"),
   displayEmail: document.getElementById("displayEmail"),
   lockedContent: document.getElementById("lockedContent"),
   unlockedContent: document.getElementById("unlockedContent"),
@@ -345,71 +320,27 @@ const showToast = debounce((msg, type='info') => {
     setTimeout(() => elements.toast.classList.remove('show'), 3000);
 }, 100);
 
-// HANDLE THE INCOMING MAGIC LINK CLICK
-function catchMagicLinkLogin() {
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn');
-        if (!email) {
-            email = window.prompt('Please enter your email again for validation matching:');
-        }
-        if (email) {
-            signInWithEmailLink(auth, email, window.location.href)
-            .then((result) => {
-                window.localStorage.removeItem('emailForSignIn');
-                showToast("Logged in successfully via Magic Link!", 'success');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            })
-            .catch((error) => {
-                showToast("Link expired or invalid: " + error.message, 'error');
-            });
-        }
-    }
-}
-catchMagicLinkLogin();
-
-// SEND MAGIC LINK SYSTEM
-elements.loginBtn.onclick = () => {
-  const email = elements.email.value.trim();
-  if(!email) return showToast("Please enter a valid email address", 'error');
-
-  elements.loginBtn.disabled = true;
-  elements.loginBtn.innerText = "Sending Link...";
-
-  const actionCodeSettings = {
-    url: window.location.origin + window.location.pathname,
-    handleCodeInApp: true
-  };
-
-  sendSignInLinkToEmail(auth, email, actionCodeSettings)
-  .then(() => {
-    window.localStorage.setItem('emailForSignIn', email);
-    showToast("Magic Link sent successfully!", 'success');
-    elements.pendingEmail.innerText = email;
+// GOOGLE BUTTON CLICK WITH FIXED LOCAL PERSISTENCE
+elements.googleLoginBtn.onclick = () => {
+    elements.googleLoginBtn.disabled = true;
     
-    // Switch login panel to feedback view
-    elements.authForm.style.display = 'none';
-    elements.verifyProfile.style.display = 'block';
-  })
-  .catch((error) => {
-    showToast("Error: " + error.message, 'error');
-  })
-  .finally(() => {
-    elements.loginBtn.disabled = false;
-    elements.loginBtn.innerText = "📩 Send Instant Login Link";
-  });
+    // Browser band karne par bhi account yaad rakhne ka system
+    setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+        return signInWithPopup(auth, provider);
+    })
+    .then((result) => {
+        showToast("Signed in successfully with Google!", 'success');
+    })
+    .catch((error) => {
+        showToast("Authentication failed: " + error.message, 'error');
+    })
+    .finally(() => {
+        elements.googleLoginBtn.disabled = false;
+    });
 };
 
-// RESEND LINK
-elements.resendBtn.onclick = () => {
-    const savedEmail = window.localStorage.getItem('emailForSignIn');
-    if(savedEmail) {
-        sendSignInLinkToEmail(auth, savedEmail, { url: window.location.origin + window.location.pathname, handleCodeInApp: true })
-        .then(() => showToast("New login link dispatched!", 'success'))
-        .catch(err => showToast(err.message, 'error'));
-    }
-};
-
-// LOGOUT SYSTEM
+// LOGOUT
 elements.logoutBtn.onclick = () => signOut(auth).then(()=>{ 
     updateUI(null); 
     showToast("Logged out successfully", 'info');
@@ -419,10 +350,8 @@ elements.logoutBtn.onclick = () => signOut(auth).then(()=>{
 });
 
 function updateUI(user){
-    // Reset views
     elements.authForm.style.display = 'none';
     elements.userProfile.style.display = 'none';
-    elements.verifyProfile.style.display = 'none';
     elements.lockedContent.style.display = 'none';
     elements.unlockedContent.style.display = 'none';
 
@@ -444,11 +373,11 @@ onAuthStateChanged(auth, (user) => {
     }, isMobile ? 300 : 100);
 });
 
-// ORIGINAL GAME OPENER
+// ROUTE GATEWAY
 window.openGame = function(url) {
     const user = auth.currentUser;
     if (!user) {
-        showToast("Please request a login link first", 'error');
+        showToast("Please sign in first", 'error');
         return;
     }
     
