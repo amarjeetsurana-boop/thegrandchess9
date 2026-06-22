@@ -1,0 +1,17 @@
+{
+  "name": "TheGrandChess9",
+  "short_name": "GrandChess9",
+  "description": "Play premium online chess games instantly on TheGrandChess9.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#020617",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "img/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
