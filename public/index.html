@@ -41,40 +41,30 @@ body{
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
 }
+.brand span{color:var(--accent)}
 
 .brand-logo {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   background: #ffffff;
   padding: 4px;
   border-radius: 10%;
-  box-shadow:
-    0 0 6px rgba(255,255,255,0.6),
-    0 0 12px rgba(34,197,94,0.6);
+  box-shadow: 0 0 6px rgba(255,255,255,0.4), 0 0 12px rgba(34,197,94,0.4);
 }
 
-/* Header - Optimized for mobile */
 header{ 
   display:flex; justify-content:space-between; align-items:center; padding:0 16px; 
   height: var(--header-height);
   background:rgba(2, 6, 23, 0.95); border-bottom:1px solid var(--border);
   position: sticky; top: 0; z-index: 100;
-  /* Removed backdrop-filter for mobile performance */
 }
 
-.brand{font-size:18px;font-weight:700; display:flex; align-items:center; gap:8px;}
-.brand span{color:var(--accent)}
-
-.nav { display: none; } 
-
-/* Main Layout - Mobile First */
 .app{ display:flex; flex-direction: column; min-height:calc(100vh - var(--header-height));}
 
-/* Sidebar - Optimized */
 .sidebar{ 
   background:rgba(15, 23, 42, 0.95); 
   padding:16px; 
@@ -99,7 +89,6 @@ header{
   letter-spacing:1px;
 }
 
-/* Lock & Verification Screens - Simplified */
 .locked-msg, .verify-msg {
     text-align: center;
     padding: 15px;
@@ -115,7 +104,6 @@ header{
     color: #fef08a;
 }
 
-/* Inputs & Buttons - Optimized for touch */
 input{ 
   width:100%; 
   padding:12px; 
@@ -125,7 +113,7 @@ input{
   color:white; 
   margin-bottom:10px; 
   outline:none;
-  font-size:16px; /* Prevents zoom on iOS */
+  font-size:16px;
   -webkit-appearance: none;
 }
 
@@ -142,8 +130,7 @@ button{
   font-weight:600; 
   cursor:pointer;
   font-size:14px; 
-  transition: background-color 0.2s ease;
-  -webkit-tap-highlight-color: rgba(255,255,255,0.1);
+  transition: background-color 0.2s ease, transform 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -154,7 +141,6 @@ button.primary:hover{ background:var(--accent-hover);}
 button.outline { background:transparent; border:1px solid var(--text-muted); color:var(--text-muted); }
 button.outline:hover { border-color:white; color:white; }
 
-/* Main Content - Optimized */
 .main-content{ 
   padding:16px; 
   display:flex; 
@@ -164,15 +150,13 @@ button.outline:hover { border-color:white; color:white; }
   flex: 1;
 }
 
-/* Game Section - Performance Optimized */
 #gameSection { 
   display:none; 
-  height: 190vh; /* Reduced for mobile */
   width: 100%; 
   margin-bottom:16px; 
   margin-top: 10px;
   position: relative;
-  transform: translateZ(0); /* Hardware acceleration */
+  transform: translateZ(0);
   will-change: transform;
 }
 
@@ -182,116 +166,53 @@ iframe{
   border:none; 
   border-radius:12px; 
   background:black;
-  /* Performance optimizations */
   transform: translateZ(0);
   will-change: contents;
 }
 
-/* Game Loading Spinner - Simplified */
 .game-loading {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.9);
-  border-radius: 12px;
-  z-index: 10;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; justify-content: center; align-items: center;
+  background: rgba(15, 23, 42, 0.9); border-radius: 12px; z-index: 10;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
+  width: 40px; height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1); border-radius: 50%;
   border-top-color: var(--accent);
   animation: spin 1s linear infinite;
-  /* Performance optimization */
-  will-change: transform;
-  transform: translateZ(0);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Warning Box - Simplified */
 .warning-box { 
   background: rgba(233, 69, 96, 0.1); 
   border: 1px solid var(--danger); 
-  padding:12px; 
-  border-radius:8px; 
-  font-size:12px; 
-  color: #fca5a5; 
-  margin-top:10px;
+  padding:12px; border-radius:8px; font-size:12px; color: #fca5a5; margin-top:10px;
 }
 
-/* Toast Notification - Optimized */
 #toast{
-  position: fixed;
-  top: calc(var(--header-height) + 10px);
-  left: 50%;
+  position: fixed; top: calc(var(--header-height) + 10px); left: 50%;
   transform: translateX(-50%) translateZ(0);
-  background: var(--panel);
-  padding: 12px 20px;
-  border-radius: 12px;
-  border-left: 4px solid var(--accent);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  z-index: 9999;
-  width: 90%;
-  max-width: 420px;
-  text-align: center;
-  font-size: 13px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  will-change: opacity, transform;
+  background: var(--panel); padding: 12px 20px; border-radius: 12px;
+  border-left: 4px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 9999; width: 90%; max-width: 420px; text-align: center; font-size: 13px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-#toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(0) translateZ(0);
-}
+#toast.show{ opacity: 1; transform: translateX(-50%) translateY(0) translateZ(0); }
 
-/* Desktop Optimizations */
 @media (min-width: 769px) {
-    .app { 
-      display: grid; 
-      grid-template-columns: 280px 1fr; 
-    }
-    .sidebar { 
-      order: 1; 
-      border-bottom: none;
-      border-right: 1px solid var(--border);
-    }
-    .main-content { 
-      order: 2; 
-    }
-    .nav { display: block; }
+    .app { display: grid; grid-template-columns: 280px 1fr; }
+    .sidebar { order: 1; border-bottom: none; border-right: 1px solid var(--border); }
+    .main-content { order: 2; }
     #gameSection { height: 85vh; }
-    header {
-      backdrop-filter: blur(10px); /* Re-enable for desktop */
-    }
 }
-
 @media (max-width: 768px) {
     .sidebar { padding: 12px; }
     .main-content { padding: 12px; }
     #gameSection { height: 100vh; }
-    .brand { font-size: 16px; }
-    .brand-logo { width: 40px; height: 40px; }
-}
-
-/* Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
 }
 </style>
 </head>
@@ -302,99 +223,87 @@ iframe{
 
 <header>
   <div class="brand">
-  <img src="img/Logo.png" alt="TheGrandChess9 Logo" class="brand-logo">
-  <span>TheGrandChess9</span>
-</div>
+    <img src="img/Logo.png" alt="TheGrandChess9 Logo" class="brand-logo">
+    <span>TheGrandChess9</span>
+  </div>
 </header>
 
 <div class="app">
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="card">
-    <h3>🔐 Account</h3>
-    
-    <!-- LOGIN FORM -->
-    <div id="authForm">
-        <input id="email" placeholder="Email Address" type="email" autocomplete="email">
-        <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-        <button id="loginBtn" class="primary">Login</button>
-        <button id="signupBtn">Sign Up</button>
-        <button id="forgotBtn" class="outline">Forgot Password?</button>
-    </div>
-
-    <!-- PROFILE (Logged In but NOT Verified) -->
-    <div id="verifyProfile" style="display:none;">
-        <div class="verify-msg" style="margin-bottom:10px;">
-            ⚠️ <strong>Email Not Verified</strong><br>
-            Please check your inbox/spam.
-        </div>
-        <div style="font-size:13px; text-align:center; margin-bottom:10px; color:var(--text-muted);" id="pendingEmail"></div>
-        <button id="resendBtn" class="primary">📩 Resend Email</button>
-        <button id="logoutBtn1" class="outline">Logout</button>
-    </div>
-
-    <!-- PROFILE (Logged In & Verified) -->
-    <div id="userProfile" style="display:none; text-align:center;">
-        <div style="color:var(--accent); font-weight:bold; margin-bottom:10px; word-break:break-all;" id="displayEmail"></div>
-        <button id="logoutBtn" style="background:var(--danger)">Logout</button>
-    </div>
-  </div>
-
-<div class="verify-msg">
-  📧 Verification email sent.<br>
-  Please check <b>Inbox</b> or <b>Spam</b> folder.
-</div>
-
-  <!-- LOCKED CONTENT (Not Logged In) -->
-  <div id="lockedContent" class="card">
-    <div class="locked-msg">
-        🔒 <strong>Restricted Access</strong><br>
-        Login & Verify Email to Play.
-    </div>
-  </div>
-
-  <!-- LOCKED CONTENT (Logged In but NOT Verified) -->
-  <div id="verifyLockedContent" class="card" style="display:none;">
-    <div class="verify-msg">
-        🚫 <strong>Access Pending</strong><br>
-        Verify email to unlock games.
-    </div>
-  </div>
-
-  <!-- UNLOCKED CONTENT -->
-  <div id="unlockedContent" style="display:none">
+  <aside class="sidebar">
     <div class="card">
-      <h3>🌍 Play Online</h3>
-      <button onclick="window.openGame('chess8x8.html')">Chess 8×8</button>
-      <button onclick="window.openGame('chess9x9.html')">Chess 9×9</button>
+      <h3>🔐 Account</h3>
+      
+      <div id="authForm">
+          <input id="email" placeholder="Email Address" type="email" autocomplete="email">
+          <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+          <button id="loginBtn" class="primary">Login</button>
+          <button id="signupBtn">Sign Up</button>
+          <button id="forgotBtn" class="outline">Forgot Password?</button>
+      </div>
+
+      <div id="verifyProfile" style="display:none;">
+          <div class="verify-msg" style="margin-bottom:10px;">
+              ⚠️ <strong>Email Not Verified</strong><br>
+              Please check your inbox/spam folder.
+          </div>
+          <div style="font-size:13px; text-align:center; margin-bottom:10px; color:var(--text-muted);" id="pendingEmail"></div>
+          <button id="resendBtn" class="primary">📩 Resend Email</button>
+          <button id="logoutBtn1" class="outline">Logout</button>
+      </div>
+
+      <div id="userProfile" style="display:none; text-align:center;">
+          <div style="color:var(--accent); font-weight:bold; margin-bottom:10px; word-break:break-all;" id="displayEmail"></div>
+          <button id="logoutBtn" style="background:var(--danger)">Logout</button>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>🤖 vs Computer</h3>
-      <button onclick="window.openGame('SuperChess8x8.html')">SuperChess8x8</button>
-      <button onclick="window.openGame('SuperChess9x9.html')">SuperChess9x9</button>
-    </div>
-  </div>
-</aside>
-
-<main class="main-content">
-    <div id="heroMsg" style="text-align:center; padding:10px;">
-        <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9</h1>
-        <p style="color:var(--text-muted); font-size:13px;">Secure verification required to play.</p>
-        
-        <div class="warning-box">
-            <strong>⚠️ Important:</strong><br>
-            If verification link doesn't work, ensure this site is hosted online.
-        </div>
+    <div id="lockedContent" class="card">
+      <div class="locked-msg">
+          🔒 <strong>Restricted Access</strong><br>
+          Login & Verify Email to Play.
+      </div>
     </div>
 
-    <div id="gameSection">
-        <div class="game-loading" id="gameLoading" style="display:none;">
-            <div class="spinner"></div>
-        </div>
-        <iframe id="gameFrame" loading="lazy"></iframe>
+    <div id="verifyLockedContent" class="card" style="display:none;">
+      <div class="verify-msg">
+          🚫 <strong>Access Pending</strong><br>
+          Verify email to unlock games.
+      </div>
     </div>
-</main>
+
+    <div id="unlockedContent" style="display:none">
+      <div class="card" style="margin-bottom:12px;">
+        <h3>🌍 Play Online</h3>
+        <button onclick="window.openGame('chess8x8.html')">Chess 8×8</button>
+        <button onclick="window.openGame('chess9x9.html')">Chess 9×9</button>
+      </div>
+
+      <div class="card">
+        <h3>🤖 vs Computer</h3>
+        <button onclick="window.openGame('SuperChess8x8.html')">SuperChess8x8</button>
+        <button onclick="window.openGame('SuperChess9x9.html')">SuperChess9x9</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+      <div id="heroMsg" style="text-align:center; padding:10px;">
+          <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9</h1>
+          <p style="color:var(--text-muted); font-size:13px;">Secure verification required to play.</p>
+          
+          <div class="warning-box">
+              <strong>⚠️ Important:</strong><br>
+              If verification link doesn't work, ensure this site is hosted online.
+          </div>
+      </div>
+
+      <div id="gameSection">
+          <div class="game-loading" id="gameLoading" style="display:none;">
+              <div class="spinner"></div>
+          </div>
+          <iframe id="gameFrame" loading="lazy" src="about:blank"></iframe>
+      </div>
+  </main>
 </div>
 
 <script type="module">
@@ -403,12 +312,10 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
 signOut, sendPasswordResetEmail, onAuthStateChanged, sendEmailVerification, applyActionCode } from
 "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// Check for mobile and reduce operations
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 if (window.location.protocol === 'file:') {
-    console.error("Firebase Auth requires HTTPS or localhost. File protocol is not supported for email verification.");
-    alert("⚠️ WARNING: You are opening this file directly from your computer.\n\nEmail Verification Links will NOT work.\n\nPlease host this file on Netlify, Vercel, or GitHub Pages.");
+    alert("⚠️ WARNING: Open via a secure hosting server to active email verification services.");
 }
 
 const firebaseConfig = {
@@ -420,7 +327,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Cache DOM elements
 const elements = {
   email: document.getElementById("email"),
   password: document.getElementById("password"),
@@ -445,20 +351,15 @@ const elements = {
   gameFrame: document.getElementById('gameFrame')
 };
 
-// Debounce function for performance
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
+    const later = () => { clearTimeout(timeout); func(...args); };
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
 }
 
-// Optimized toast notification
 const showToast = debounce((msg, type='info') => {
     elements.toast.innerText = msg;
     elements.toast.style.borderLeftColor = type === 'error' ? '#e94560' : '#22c55e';
@@ -466,7 +367,6 @@ const showToast = debounce((msg, type='info') => {
     setTimeout(() => elements.toast.classList.remove('show'), 3000);
 }, 100);
 
-// Check if the URL contains an action code (for email verification)
 function handleEmailVerification() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
@@ -475,134 +375,79 @@ function handleEmailVerification() {
     if (mode === 'verifyEmail' && actionCode) {
         applyActionCode(auth, actionCode)
         .then(() => {
-            showToast("Email verified! You can now login.", 'success');
+            showToast("Email verified successfully! You can login now.", 'success');
             window.history.replaceState({}, document.title, window.location.pathname);
         })
-        .catch((error) => {
-            showToast("Error: " + error.message, 'error');
-            console.error("Error applying action code:", error);
-        });
+        .catch((error) => { showToast("Error: " + error.message, 'error'); });
     }
 }
-
-// Call this function on page load
 handleEmailVerification();
 
-// SIGN UP LOGIC
+// SIGN UP
 elements.signupBtn.onclick = () => {
   const email = elements.email.value.trim();
   const pass = elements.password.value.trim();
-
   if(!email || !pass) return showToast("Please fill all fields", 'error');
 
   elements.signupBtn.disabled = true;
-  elements.signupBtn.innerText = "Creating...";
-
   createUserWithEmailAndPassword(auth, email, pass)
   .then(({user}) => {
-
-    const actionCodeSettings = {
-      url: window.location.origin + window.location.pathname,
-      handleCodeInApp: true 
-    };
-
-    return sendEmailVerification(user, actionCodeSettings)
+    return sendEmailVerification(user, { url: window.location.origin + window.location.pathname, handleCodeInApp: true })
     .then(() => {
-        // 👇 MAIN MESSAGE (IMPORTANT)
-        showToast(
-          `📧 Verification email sent to ${email}. Check Inbox or Spam.`,
-          'success'
-        );
-
-        // 👇 BIG POPUP (clear instruction)
-        alert(
-`Account Created!
-
-📧 A verification email has been sent to:
-${email}
-
-👉 Please check:
-• Inbox
-• Spam / Junk folder
-
-⚠️ You must verify before login.`
-        );
-
+        showToast(`Verification link sent to ${email}`, 'success');
+        alert(`Account Created!\n\nA verification email has been sent to:\n${email}\n\nPlease check your Inbox or Spam folder.`);
         signOut(auth);
     });
   })
-  .catch(err => {
-    if (err.code === "auth/email-already-in-use") {
-      showToast("Email already registered. Please login.", 'error');
-    } else {
-      showToast(err.message, 'error');
-    }
-  })
-  .finally(() => {
-    elements.signupBtn.disabled = false;
-    elements.signupBtn.innerText = "Sign Up";
-  });
+  .catch(err => showToast(err.message, 'error'))
+  .finally(() => { elements.signupBtn.disabled = false; });
 };
 
-// LOGIN LOGIC
+// LOGIN
 elements.loginBtn.onclick = () => {
   if(!elements.email.value || !elements.password.value) return showToast("Enter details", 'error');
   
   signInWithEmailAndPassword(auth, elements.email.value, elements.password.value)
   .then(async ({user}) => {
     await user.reload(); 
-    
+    updateUI(user);
     if(user.emailVerified){
-        updateUI(user);
         showToast("Logged in successfully!", 'success');
     } else {
         showToast("Please verify your email first.", 'error');
-        updateUI(user);
     }
   })
   .catch(err => showToast(err.message, 'error'));
-}
+};
 
-// LOGOUT
-elements.logoutBtn.onclick = () => signOut(auth).then(()=>{ 
+// LOGOUT SYSTEMS
+const logoutUserSession = () => signOut(auth).then(()=>{ 
     updateUI(null); 
-    showToast("Logged out", 'info');
-    // Reset game view
+    showToast("Logged out successfully", 'info');
     elements.heroMsg.style.display = 'block';
     elements.gameSection.style.display = 'none';
-    elements.gameFrame.src = '';
+    elements.gameFrame.src = 'about:blank';
 });
+elements.logoutBtn.onclick = logoutUserSession;
+elements.logoutBtn1.onclick = logoutUserSession;
 
-elements.logoutBtn1.onclick = () => signOut(auth).then(()=>{ 
-    updateUI(null); 
-    showToast("Logged out", 'info');
-});
-
-// RESEND VERIFICATION
 elements.resendBtn.onclick = () => {
     const user = auth.currentUser;
     if(user && !user.emailVerified){
-        const actionCodeSettings = {
-            url: window.location.origin + window.location.pathname,
-            handleCodeInApp: true
-        };
-        sendEmailVerification(user, actionCodeSettings)
+        sendEmailVerification(user, { url: window.location.origin + window.location.pathname, handleCodeInApp: true })
         .then(() => showToast("Verification email resent!", 'success'))
         .catch(err => showToast(err.message, 'error'));
     }
-}
+};
 
-// FORGOT PASSWORD
 elements.forgotBtn.onclick = () => {
     if(!elements.email.value) return showToast("Enter email first", 'error');
     sendPasswordResetEmail(auth, elements.email.value)
-    .then(()=>showToast("Reset email sent!", 'success'))
+    .then(()=>showToast("Reset link sent!", 'success'))
     .catch(err=>showToast(err.message, 'error'));
-}
+};
 
-// UI STATE MANAGER - Optimized
 function updateUI(user){
-    // Hide all first
     elements.authForm.style.display = 'none';
     elements.userProfile.style.display = 'none';
     elements.verifyProfile.style.display = 'none';
@@ -626,80 +471,38 @@ function updateUI(user){
     }
 }
 
-// AUTH STATE LISTENER - Optimized
 let authStateTimer;
 onAuthStateChanged(auth, (user) => {
-    // Clear previous timer
     if (authStateTimer) clearTimeout(authStateTimer);
-    
-    // Debounce auth state changes
     authStateTimer = setTimeout(() => {
-        if(user){
-            user.reload().then(() => {
-                updateUI(user);
-            });
-        } else { 
-            updateUI(null); 
-        }
-    }, isMobile ? 300 : 100); // Longer delay on mobile
+        if(user) user.reload().then(() => updateUI(user));
+        else updateUI(null);
+    }, isMobile ? 300 : 100);
 });
 
-// Make the openGame function globally accessible - Optimized
+// ORIGINAL ROUTE GATEWAY (WITHOUT ROOM PARAMETERS INTERFERENCE)
 window.openGame = function(url) {
     const user = auth.currentUser;
-    
-    if (!user) {
-        showToast("Please login first", 'error');
+    if (!user || !user.emailVerified) {
+        showToast("Please login and verify your email first", 'error');
         return;
     }
     
-    if (!user.emailVerified) {
-        showToast("Please verify your email first", 'error');
-        return;
-    }
-    
-    // Hide hero, show game section
     elements.heroMsg.style.display = 'none';
     elements.gameSection.style.display = 'block';
     elements.gameLoading.style.display = 'flex';
-    
-    // Clear previous game
     elements.gameFrame.src = 'about:blank';
     
-    // Load new game with delay for better UX
     setTimeout(() => {
-        elements.gameFrame.onload = function() {
-            elements.gameLoading.style.display = 'none';
-        };
-        
-        elements.gameFrame.onerror = function() {
-            elements.gameLoading.style.display = 'none';
-            showToast("Failed to load game", 'error');
-        };
-        
+        elements.gameFrame.onload = () => elements.gameLoading.style.display = 'none';
         elements.gameFrame.src = url;
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
 };
 
-// Clean up on page unload
 window.addEventListener('beforeunload', () => {
-    if (elements.gameFrame) {
-        elements.gameFrame.src = 'about:blank';
-    }
+    if (elements.gameFrame) elements.gameFrame.src = 'about:blank';
 });
-
-// Performance monitoring
-if (window.performance && window.performance.memory) {
-    setInterval(() => {
-        if (window.performance.memory.usedJSHeapSize > 50000000) { // 50MB
-            console.warn('High memory usage detected');
-            // Force garbage collection if available
-            if (window.gc) window.gc();
-        }
-    }, 30000);
-}
 </script>
-
 </body>
 </html>
