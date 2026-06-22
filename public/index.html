@@ -99,9 +99,9 @@ header{
 }
 
 .verify-msg {
-    background: rgba(234, 179, 8, 0.1);
-    border-color: #eab308;
-    color: #fef08a;
+    background: rgba(34, 197, 94, 0.1);
+    border-color: var(--accent);
+    color: #bbf7d0;
 }
 
 input{ 
@@ -138,8 +138,6 @@ button:hover{ background:#475569;}
 button:active{ transform: scale(0.98); }
 button.primary{ background:var(--accent); color:#052e16;}
 button.primary:hover{ background:var(--accent-hover);}
-button.outline { background:transparent; border:1px solid var(--text-muted); color:var(--text-muted); }
-button.outline:hover { border-color:white; color:white; }
 
 .main-content{ 
   padding:16px; 
@@ -231,24 +229,21 @@ iframe{
 <div class="app">
   <aside class="sidebar">
     <div class="card">
-      <h3>🔐 Account</h3>
+      <h3>🌍 Instant Access</h3>
       
       <div id="authForm">
-          <input id="email" placeholder="Email Address" type="email" autocomplete="email">
-          <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-          <button id="loginBtn" class="primary">Login</button>
-          <button id="signupBtn">Sign Up</button>
-          <button id="forgotBtn" class="outline">Forgot Password?</button>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">No password required. Enter your email to get a direct login link.</p>
+          <input id="email" placeholder="Your Email Address" type="email" autocomplete="email">
+          <button id="loginBtn" class="primary">📩 Send Instant Login Link</button>
       </div>
 
       <div id="verifyProfile" style="display:none;">
           <div class="verify-msg" style="margin-bottom:10px;">
-              ⚠️ <strong>Email Not Verified</strong><br>
-              Please check your inbox/spam folder.
+              🚀 <strong>Magic Link Dispatched!</strong><br>
+              Check your email inbox or spam folder to log in instantly.
           </div>
           <div style="font-size:13px; text-align:center; margin-bottom:10px; color:var(--text-muted);" id="pendingEmail"></div>
-          <button id="resendBtn" class="primary">📩 Resend Email</button>
-          <button id="logoutBtn1" class="outline">Logout</button>
+          <button id="resendBtn" class="primary">🔄 Resend Login Link</button>
       </div>
 
       <div id="userProfile" style="display:none; text-align:center;">
@@ -260,14 +255,7 @@ iframe{
     <div id="lockedContent" class="card">
       <div class="locked-msg">
           🔒 <strong>Restricted Access</strong><br>
-          Login & Verify Email to Play.
-      </div>
-    </div>
-
-    <div id="verifyLockedContent" class="card" style="display:none;">
-      <div class="verify-msg">
-          🚫 <strong>Access Pending</strong><br>
-          Verify email to unlock games.
+          Click the link sent to your email to unlock all chess variants.
       </div>
     </div>
 
@@ -289,11 +277,11 @@ iframe{
   <main class="main-content">
       <div id="heroMsg" style="text-align:center; padding:10px;">
           <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9</h1>
-          <p style="color:var(--text-muted); font-size:13px;">Secure verification required to play.</p>
+          <p style="color:var(--text-muted); font-size:13px;">Secure passwordless magic-link verification system.</p>
           
           <div class="warning-box">
               <strong>⚠️ Important:</strong><br>
-              If verification link doesn't work, ensure this site is hosted online.
+              Make sure you open the login link on the same device/browser you used to request it.
           </div>
       </div>
 
@@ -308,15 +296,10 @@ iframe{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-signOut, sendPasswordResetEmail, onAuthStateChanged, sendEmailVerification, applyActionCode } from
+import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from
 "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-if (window.location.protocol === 'file:') {
-    alert("⚠️ WARNING: Open via a secure hosting server to active email verification services.");
-}
 
 const firebaseConfig = {
   apiKey: "AIzaSyAszg47yTdrGvq7Tr5xnuyx0qnj8SmAgL0",
@@ -329,20 +312,15 @@ const auth = getAuth(app);
 
 const elements = {
   email: document.getElementById("email"),
-  password: document.getElementById("password"),
   loginBtn: document.getElementById("loginBtn"),
-  signupBtn: document.getElementById("signupBtn"),
   logoutBtn: document.getElementById("logoutBtn"),
-  logoutBtn1: document.getElementById("logoutBtn1"),
   resendBtn: document.getElementById("resendBtn"),
-  forgotBtn: document.getElementById("forgotBtn"),
   authForm: document.getElementById("authForm"),
   verifyProfile: document.getElementById("verifyProfile"),
   userProfile: document.getElementById("userProfile"),
   pendingEmail: document.getElementById("pendingEmail"),
   displayEmail: document.getElementById("displayEmail"),
   lockedContent: document.getElementById("lockedContent"),
-  verifyLockedContent: document.getElementById("verifyLockedContent"),
   unlockedContent: document.getElementById("unlockedContent"),
   toast: document.getElementById('toast'),
   heroMsg: document.getElementById('heroMsg'),
@@ -367,104 +345,91 @@ const showToast = debounce((msg, type='info') => {
     setTimeout(() => elements.toast.classList.remove('show'), 3000);
 }, 100);
 
-function handleEmailVerification() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    const actionCode = urlParams.get('oobCode');
-    
-    if (mode === 'verifyEmail' && actionCode) {
-        applyActionCode(auth, actionCode)
-        .then(() => {
-            showToast("Email verified successfully! You can login now.", 'success');
-            window.history.replaceState({}, document.title, window.location.pathname);
-        })
-        .catch((error) => { showToast("Error: " + error.message, 'error'); });
+// HANDLE THE INCOMING MAGIC LINK CLICK
+function catchMagicLinkLogin() {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+        let email = window.localStorage.getItem('emailForSignIn');
+        if (!email) {
+            email = window.prompt('Please enter your email again for validation matching:');
+        }
+        if (email) {
+            signInWithEmailLink(auth, email, window.location.href)
+            .then((result) => {
+                window.localStorage.removeItem('emailForSignIn');
+                showToast("Logged in successfully via Magic Link!", 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            })
+            .catch((error) => {
+                showToast("Link expired or invalid: " + error.message, 'error');
+            });
+        }
     }
 }
-handleEmailVerification();
+catchMagicLinkLogin();
 
-// SIGN UP
-elements.signupBtn.onclick = () => {
-  const email = elements.email.value.trim();
-  const pass = elements.password.value.trim();
-  if(!email || !pass) return showToast("Please fill all fields", 'error');
-
-  elements.signupBtn.disabled = true;
-  createUserWithEmailAndPassword(auth, email, pass)
-  .then(({user}) => {
-    return sendEmailVerification(user, { url: window.location.origin + window.location.pathname, handleCodeInApp: true })
-    .then(() => {
-        showToast(`Verification link sent to ${email}`, 'success');
-        alert(`Account Created!\n\nA verification email has been sent to:\n${email}\n\nPlease check your Inbox or Spam folder.`);
-        signOut(auth);
-    });
-  })
-  .catch(err => showToast(err.message, 'error'))
-  .finally(() => { elements.signupBtn.disabled = false; });
-};
-
-// LOGIN
+// SEND MAGIC LINK SYSTEM
 elements.loginBtn.onclick = () => {
-  if(!elements.email.value || !elements.password.value) return showToast("Enter details", 'error');
-  
-  signInWithEmailAndPassword(auth, elements.email.value, elements.password.value)
-  .then(async ({user}) => {
-    await user.reload(); 
-    updateUI(user);
-    if(user.emailVerified){
-        showToast("Logged in successfully!", 'success');
-    } else {
-        showToast("Please verify your email first.", 'error');
-    }
+  const email = elements.email.value.trim();
+  if(!email) return showToast("Please enter a valid email address", 'error');
+
+  elements.loginBtn.disabled = true;
+  elements.loginBtn.innerText = "Sending Link...";
+
+  const actionCodeSettings = {
+    url: window.location.origin + window.location.pathname,
+    handleCodeInApp: true
+  };
+
+  sendSignInLinkToEmail(auth, email, actionCodeSettings)
+  .then(() => {
+    window.localStorage.setItem('emailForSignIn', email);
+    showToast("Magic Link sent successfully!", 'success');
+    elements.pendingEmail.innerText = email;
+    
+    // Switch login panel to feedback view
+    elements.authForm.style.display = 'none';
+    elements.verifyProfile.style.display = 'block';
   })
-  .catch(err => showToast(err.message, 'error'));
+  .catch((error) => {
+    showToast("Error: " + error.message, 'error');
+  })
+  .finally(() => {
+    elements.loginBtn.disabled = false;
+    elements.loginBtn.innerText = "📩 Send Instant Login Link";
+  });
 };
 
-// LOGOUT SYSTEMS
-const logoutUserSession = () => signOut(auth).then(()=>{ 
+// RESEND LINK
+elements.resendBtn.onclick = () => {
+    const savedEmail = window.localStorage.getItem('emailForSignIn');
+    if(savedEmail) {
+        sendSignInLinkToEmail(auth, savedEmail, { url: window.location.origin + window.location.pathname, handleCodeInApp: true })
+        .then(() => showToast("New login link dispatched!", 'success'))
+        .catch(err => showToast(err.message, 'error'));
+    }
+};
+
+// LOGOUT SYSTEM
+elements.logoutBtn.onclick = () => signOut(auth).then(()=>{ 
     updateUI(null); 
     showToast("Logged out successfully", 'info');
     elements.heroMsg.style.display = 'block';
     elements.gameSection.style.display = 'none';
     elements.gameFrame.src = 'about:blank';
 });
-elements.logoutBtn.onclick = logoutUserSession;
-elements.logoutBtn1.onclick = logoutUserSession;
-
-elements.resendBtn.onclick = () => {
-    const user = auth.currentUser;
-    if(user && !user.emailVerified){
-        sendEmailVerification(user, { url: window.location.origin + window.location.pathname, handleCodeInApp: true })
-        .then(() => showToast("Verification email resent!", 'success'))
-        .catch(err => showToast(err.message, 'error'));
-    }
-};
-
-elements.forgotBtn.onclick = () => {
-    if(!elements.email.value) return showToast("Enter email first", 'error');
-    sendPasswordResetEmail(auth, elements.email.value)
-    .then(()=>showToast("Reset link sent!", 'success'))
-    .catch(err=>showToast(err.message, 'error'));
-};
 
 function updateUI(user){
+    // Reset views
     elements.authForm.style.display = 'none';
     elements.userProfile.style.display = 'none';
     elements.verifyProfile.style.display = 'none';
     elements.lockedContent.style.display = 'none';
-    elements.verifyLockedContent.style.display = 'none';
     elements.unlockedContent.style.display = 'none';
 
     if (user) {
-        if (user.emailVerified) {
-            elements.userProfile.style.display = 'block';
-            elements.displayEmail.innerText = user.email;
-            elements.unlockedContent.style.display = 'block';
-        } else {
-            elements.verifyProfile.style.display = 'block';
-            elements.pendingEmail.innerText = user.email;
-            elements.verifyLockedContent.style.display = 'block';
-        }
+        elements.userProfile.style.display = 'block';
+        elements.displayEmail.innerText = user.email;
+        elements.unlockedContent.style.display = 'block';
     } else {
         elements.authForm.style.display = 'block';
         elements.lockedContent.style.display = 'block';
@@ -475,16 +440,15 @@ let authStateTimer;
 onAuthStateChanged(auth, (user) => {
     if (authStateTimer) clearTimeout(authStateTimer);
     authStateTimer = setTimeout(() => {
-        if(user) user.reload().then(() => updateUI(user));
-        else updateUI(null);
+        updateUI(user);
     }, isMobile ? 300 : 100);
 });
 
-// ORIGINAL ROUTE GATEWAY (WITHOUT ROOM PARAMETERS INTERFERENCE)
+// ORIGINAL GAME OPENER
 window.openGame = function(url) {
     const user = auth.currentUser;
-    if (!user || !user.emailVerified) {
-        showToast("Please login and verify your email first", 'error');
+    if (!user) {
+        showToast("Please request a login link first", 'error');
         return;
     }
     
