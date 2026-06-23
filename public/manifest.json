@@ -1,7 +1,7 @@
 {
-  "name": "TheGrandChess9",
-  "short_name": "GrandChess9",
-  "description": "Play premium online chess games instantly on TheGrandChess9.",
+  "name": "TheGrandChess9x9 - Premium Chess",
+  "short_name": "GrandChess9x9",
+  "description": "Play premium GrandChess9x9 and super chess games online instantly. No download required!",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f172a",
