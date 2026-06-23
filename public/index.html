@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TheGrandChess9 • Play Online Chess</title>
+
+<!-- 👑 SEO Updated Title & Meta Tags -->
+<title>TheGrandChess9x9 • Play Premium Online Chess Game</title>
+<meta name="description" content="Play premium GrandChess9x9 and super chess games online instantly. Enjoy 1-click fast Google verification and play free with friends!">
+<meta name="keywords" content="chess, 9x9 chess, grandchess9x9, play chess online, super chess, free online chess">
+
+<!-- 📱 PWA Manifest Link -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <style>
@@ -206,7 +215,7 @@ iframe{
 <header>
   <div class="brand">
     <img src="img/Logo.png" alt="TheGrandChess9 Logo" class="brand-logo">
-    <span>TheGrandChess9</span>
+    <span>TheGrandChess9x9</span>
   </div>
 </header>
 
@@ -244,7 +253,8 @@ iframe{
       <div class="card" style="margin-bottom:12px;">
         <h3>🌍 Play Online</h3>
         <button onclick="window.openGame('chess8x8.html')">Chess 8×8</button>
-        <button onclick="window.openGame('chess9x9.html')">Chess 9×9</button>
+        <!-- ⚡ Naye naam GrandChess9x9.html ke sath update kiya -->
+        <button onclick="window.openGame('GrandChess9x9.html')">GrandChess 9×9 🔥</button>
       </div>
 
       <div class="card">
@@ -257,7 +267,7 @@ iframe{
 
   <main class="main-content">
       <div id="heroMsg" style="text-align:center; padding:10px;">
-          <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9</h1>
+          <h1 style="color:white; font-size:1.5rem; margin-bottom:5px;">TheGrandChess9x9</h1>
           <p style="color:var(--text-muted); font-size:13px;">1-Click fast verification system.</p>
       </div>
 
@@ -319,11 +329,8 @@ const showToast = debounce((msg, type='info') => {
     setTimeout(() => elements.toast.classList.remove('show'), 3000);
 }, 100);
 
-// GOOGLE LOGIN WITH LOCAL PERSISTENCE FIX
 elements.googleLoginBtn.onclick = () => {
     elements.googleLoginBtn.disabled = true;
-    
-    // Ise bolte hain permanent storage setup karna, taaki tab band hone par login na ude
     setPersistence(auth, browserLocalPersistence)
     .then(() => {
         return signInWithPopup(auth, provider);
@@ -339,7 +346,6 @@ elements.googleLoginBtn.onclick = () => {
     });
 };
 
-// LOGOUT
 elements.logoutBtn.onclick = () => signOut(auth).then(()=>{ 
     updateUI(null); 
     showToast("Logged out successfully", 'info');
@@ -385,15 +391,24 @@ window.openGame = function(url) {
     elements.gameFrame.src = 'about:blank';
     
     setTimeout(() => {
-        elements.gameFrame.onload = () => elements.gameLoading.style.display = 'none';
-        elements.gameFrame.src = url;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      elements.gameFrame.onload = () => elements.gameLoading.style.display = 'none';
+      elements.gameFrame.src = url;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
 };
 
 window.addEventListener('beforeunload', () => {
     if (elements.gameFrame) elements.gameFrame.src = 'about:blank';
 });
+
+// 🚀 3. PWA Service Worker Registration Script
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('PWA Service Worker Registered!'))
+      .catch(err => console.error('Service Worker Registration Failed:', err));
+  });
+}
 </script>
 </body>
 </html>
