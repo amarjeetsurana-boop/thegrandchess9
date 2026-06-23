@@ -239,7 +239,7 @@ iframe{
       </div>
     </div>
 
-    <!-- UNLOCKED CONTENT MENU -->
+    <!-- UNLOCKED CONTENT -->
     <div id="unlockedContent" style="display:none">
       <div class="card" style="margin-bottom:12px;">
         <h3>🌍 Play Online</h3>
@@ -270,12 +270,11 @@ iframe{
   </main>
 </div>
 
-<!-- ==========================================
-     FIREBASE 1-CLICK PERMANENT AUTH ENGINE
-     ========================================== -->
+<!-- FIREBASE STORAGE & POPUP FIX ENGINE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from
+"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
@@ -320,11 +319,11 @@ const showToast = debounce((msg, type='info') => {
     setTimeout(() => elements.toast.classList.remove('show'), 3000);
 }, 100);
 
-// GOOGLE BUTTON CLICK WITH FIXED LOCAL PERSISTENCE
+// GOOGLE LOGIN WITH LOCAL PERSISTENCE FIX
 elements.googleLoginBtn.onclick = () => {
     elements.googleLoginBtn.disabled = true;
     
-    // Browser band karne par bhi account yaad rakhne ka system
+    // Ise bolte hain permanent storage setup karna, taaki tab band hone par login na ude
     setPersistence(auth, browserLocalPersistence)
     .then(() => {
         return signInWithPopup(auth, provider);
@@ -373,7 +372,6 @@ onAuthStateChanged(auth, (user) => {
     }, isMobile ? 300 : 100);
 });
 
-// ROUTE GATEWAY
 window.openGame = function(url) {
     const user = auth.currentUser;
     if (!user) {
@@ -396,19 +394,6 @@ window.openGame = function(url) {
 window.addEventListener('beforeunload', () => {
     if (elements.gameFrame) elements.gameFrame.src = 'about:blank';
 });
-
-
-<link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker Registered'))
-        .catch(err => console.log('Service Worker Error', err));
-    });
-  }
-
-
 </script>
 </body>
 </html>
