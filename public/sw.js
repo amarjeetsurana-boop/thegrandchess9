@@ -4,7 +4,8 @@ const CACHE_NAME = 'grandchess9x9-v1';
 const ASSETS = [
   './',                  // Main root folder
   'index.html',          // Aapka main page
-  'GrandChess9x9.html',  // Naya 9x9 version (jo bhi aapne naam rakha ho)
+  'chess8x8.html',
+  'chess9x9.html',  // Naya 9x9 version (jo bhi aapne naam rakha ho)
   'img/Logo.png'         // Aapka handsome logo
   // Agar aapki koi style.css ya script.js file hai, toh use bhi yahan jodein
 ];
