@@ -3,10 +3,13 @@ const CACHE_NAME = 'grandchess9x9-v1';
 // 👑 1. Saari zaroori files ko yahan list karein taaki app fast load ho
 const ASSETS = [
   './',                  // Main root folder
-  'index.html',          // Aapka main page
+  'index.html',
   'chess8x8.html',
-  'chess9x9.html',  // Naya 9x9 version (jo bhi aapne naam rakha ho)
-  'img/Logo.png'         // Aapka handsome logo
+  'chess9x9.html',
+  'SuperChess8x8.html',
+  'SuperChess9x9.html',
+  'manifest.json',
+  'img/Logo.png',        // Aapka handsome logo
   // Agar aapki koi style.css ya script.js file hai, toh use bhi yahan jodein
 ];
 
