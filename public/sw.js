@@ -1,52 +1,68 @@
-const CACHE_NAME = 'grandchess9x9-v1';
+const CACHE_NAME = 'grandchess9x9-v2';   // Version badal diya (update ke liye)
 
-// 👑 1. Saari zaroori files ko yahan list karein taaki app fast load ho
 const ASSETS = [
-  './',                  // Main root folder
+  './',
   'index.html',
   'chess8x8.html',
   'chess9x9.html',
   'SuperChess8x8.html',
   'SuperChess9x9.html',
   'manifest.json',
-  'img/Logo.png',        // Aapka handsome logo
-  // Agar aapki koi style.css ya script.js file hai, toh use bhi yahan jodein
+  'img/Logo.png',
+  // अगर और कोई इमेज, CSS या JS फाइल है तो यहाँ जोड़ दें
 ];
 
-// Install Event: Saari files ko cache mein save karna
+// Install Event
 self.addEventListener('install', (e) => {
+  console.log('🚀 Service Worker Installing...');
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching all game assets...');
+      console.log('📦 Caching game assets...');
       return cache.addAll(ASSETS);
     })
   );
-  self.skipWaiting(); // Naye service worker ko turant active karne ke liye
+  self.skipWaiting();
 });
 
-// Activate Event: Purane cache ko delete karna (jab aap game update karein)
+// Activate Event
 self.addEventListener('activate', (e) => {
+  console.log('✅ Service Worker Activated');
   e.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('Removing old cache...', key);
+            console.log('🗑️ Deleting old cache:', key);
             return caches.delete(key);
           }
         })
       );
     })
   );
+  self.clients.claim();
 });
 
-// Fetch Event: Cache-First Strategy (Isse game offline bhi fast khulegai)
+// Fetch Event - Cache First Strategy
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      // Agar cache mein file hai toh wahan se do, nahi toh internet se lao
-      return cachedResponse || fetch(e.request).catch(() => {
-        // Agar internet bhi nahi hai aur file cache mein bhi nahi hai (Offline fallback)
+      // Cache mein hai toh wahi return karo
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      // Cache mein nahi hai toh network se lao
+      return fetch(e.request).then((networkResponse) => {
+        // Important files ko cache mein save karo
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseClone);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Offline mode - agar page hai toh index.html return karo
         if (e.request.mode === 'navigate') {
           return caches.match('index.html');
         }
