@@ -1,13 +1,18 @@
 {
-  "name": "TheGrandChess9x9 - Premium Chess",
-  "short_name": "Chess9x9",
-  "description": "Play premium Chess9x9 and super chess games online instantly. No download required!",
-  "start_url": "./",
+  "name": "TheGrandChess9",
+  "short_name": "GrandChess9",
+  "description": "Play 9x9 Premium Chess Online",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#020617",
-  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#22c55e",
+  "orientation": "portrait-primary",
   "icons": [
+    {
+      "src": "img/Logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
     {
       "src": "img/Logo.png",
       "sizes": "512x512",
