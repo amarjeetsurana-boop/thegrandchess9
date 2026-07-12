@@ -20,12 +20,13 @@ body {
   background: #f9f9f9;
 }
 
-.pdf-container {
-  max-width: 210mm; /* A4 width */
-  margin: 0 auto;
-  background: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  padding: 20mm;
+.pdf-container{
+    width:100%;
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    box-shadow:0 0 10px rgba(0,0,0,.1);
 }
 
 /* Header Styles */
@@ -275,6 +276,93 @@ body {
     page-break-inside: avoid;
   }
 }
+
+/* ================= MOBILE ================= */
+
+@media screen and (max-width:768px){
+
+body{
+    font-size:15px;
+}
+
+.pdf-container{
+    width:100%;
+    padding:12px;
+    margin:0;
+    box-shadow:none;
+}
+
+.header{
+    padding-bottom:15px;
+    margin-bottom:20px;
+}
+
+.logo{
+    width:60px;
+    height:60px;
+}
+
+.title{
+    font-size:24px;
+}
+
+.subtitle{
+    font-size:15px;
+}
+
+.section-title{
+    font-size:20px;
+}
+
+.rule-title{
+    font-size:17px;
+}
+
+.rule-content,
+.english-text,
+.rule-list li{
+    font-size:15px;
+}
+
+.two-column{
+    flex-direction:column;
+    gap:10px;
+}
+
+.movement-diagram{
+    flex-direction:column;
+}
+
+.movement-item{
+    width:100%;
+}
+
+.rule-table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+.rule-image,
+.movement-image{
+    width:100%;
+    height:auto;
+}
+
+.toc{
+    padding:12px;
+}
+
+.toc-title{
+    font-size:18px;
+}
+
+.footer{
+    font-size:13px;
+}
+
+}
+
 </style>
 </head>
 
