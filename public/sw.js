@@ -7,6 +7,7 @@ const ASSETS = [
   'chess9x9.html',
   'SuperChess8x8.html',
   'SuperChess9x9.html',
+  'Chess9x9PlaywithAI.html',
   'manifest.json',
   'img/Logo.png',
   // अगर और कोई इमेज, CSS या JS फाइल है तो यहाँ जोड़ दें
