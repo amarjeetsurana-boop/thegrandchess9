@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grandchess9x9-v2';   // Version badal diya (update ke liye)
+const CACHE_NAME = 'grandchess9x9-v3';
 
 const ASSETS = [
   './',
@@ -10,64 +10,110 @@ const ASSETS = [
   'Chess9x9PlaywithAI.html',
   'manifest.json',
   'img/Logo.png',
-  // अगर और कोई इमेज, CSS या JS फाइल है तो यहाँ जोड़ दें
 ];
 
-// Install Event
-self.addEventListener('install', (e) => {
+// Install
+self.addEventListener('install', (event) => {
   console.log('🚀 Service Worker Installing...');
-  e.waitUntil(
+
+  event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('📦 Caching game assets...');
+      console.log('📦 Caching Assets...');
       return cache.addAll(ASSETS);
     })
   );
+
   self.skipWaiting();
 });
 
-// Activate Event
-self.addEventListener('activate', (e) => {
+// Activate
+self.addEventListener('activate', (event) => {
   console.log('✅ Service Worker Activated');
-  e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
+
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('🗑️ Deleting old cache:', key);
+            console.log('🗑 Removing Old Cache:', key);
             return caches.delete(key);
           }
         })
-      );
-    })
+      )
+    )
   );
+
   self.clients.claim();
 });
 
-// Fetch Event - Cache First Strategy
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      // Cache mein hai toh wahi return karo
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+// Fetch
+self.addEventListener('fetch', (event) => {
 
-      // Cache mein nahi hai toh network se lao
-      return fetch(e.request).then((networkResponse) => {
-        // Important files ko cache mein save karo
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
+  // ===== HTML Pages हमेशा Server से =====
+  if (event.request.mode === 'navigate') {
+
+    event.respondWith(
+
+      fetch(event.request)
+        .then((response) => {
+
+          const copy = response.clone();
+
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, responseClone);
+            cache.put(event.request, copy);
           });
+
+          return response;
+
+        })
+        .catch(() => {
+
+          return caches.match(event.request)
+            .then((cached) => {
+
+              return cached || caches.match('index.html');
+
+            });
+
+        })
+
+    );
+
+    return;
+
+  }
+
+  // ===== बाकी Files Cache First =====
+
+  event.respondWith(
+
+    caches.match(event.request).then((cached) => {
+
+      if (cached) return cached;
+
+      return fetch(event.request).then((response) => {
+
+        if (
+          response &&
+          response.status === 200 &&
+          event.request.method === "GET" &&
+          event.request.url.startsWith("http")
+        ) {
+
+          const copy = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, copy);
+          });
+
         }
-        return networkResponse;
-      }).catch(() => {
-        // Offline mode - agar page hai toh index.html return karo
-        if (e.request.mode === 'navigate') {
-          return caches.match('index.html');
-        }
+
+        return response;
+
       });
+
     })
+
   );
+
 });
