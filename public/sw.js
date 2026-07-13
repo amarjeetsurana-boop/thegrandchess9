@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grandchess9x9-v3';
+const CACHE_NAME = 'grandchess9x9-v4';
 
 const ASSETS = [
   './',
@@ -7,7 +7,6 @@ const ASSETS = [
   'chess9x9.html',
   'SuperChess8x8.html',
   'SuperChess9x9.html',
-  'Chess9x9PlaywithAI.html',
   'manifest.json',
   'img/Logo.png',
 ];
