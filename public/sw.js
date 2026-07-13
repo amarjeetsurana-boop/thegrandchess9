@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grandchess9x9-v4';
+const CACHE_NAME = 'grandchess9x9-v5';
 
 const ASSETS = [
   './',
