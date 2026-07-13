@@ -3,6 +3,7 @@ const CACHE_NAME = 'grandchess9x9-v5';
 const ASSETS = [
   './',
   'index.html',
+  'Rules.html',
   'chess8x8.html',
   'chess9x9.html',
   'SuperChess8x8.html',
