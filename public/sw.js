@@ -10,6 +10,8 @@ const ASSETS = [
   'SuperChess9x9.html',
   'manifest.json',
   'img/Logo.png',
+  'socket-clint.js',
+  
 ];
 
 // Install
